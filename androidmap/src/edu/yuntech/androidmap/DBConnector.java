@@ -18,12 +18,12 @@ import org.apache.http.protocol.HTTP;
 import android.util.Log;
 
 public class DBConnector {
-    public static String executeQuery(String query_string) {
+    public static String executeQuery(String query_string, String url) {
         String result = "";
         
         try {
             HttpClient httpClient = new DefaultHttpClient();
-            HttpPost httpPost = new HttpPost("http://140.125.45.113/contest/travel.php");
+            HttpPost httpPost = new HttpPost(url);
             ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
             params.add(new BasicNameValuePair("query_string", query_string));
             httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));

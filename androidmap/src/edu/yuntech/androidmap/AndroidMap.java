@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
@@ -19,6 +20,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
@@ -29,6 +31,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.animation.BounceInterpolator;
@@ -36,7 +39,8 @@ import android.view.animation.Interpolator;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -67,15 +71,18 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	
     private GoogleMap map;
     private LocationClient mLocationClient;
-    private TextView mTapTextView;
-    private Button btn;
     private Spinner spin;
-    private String id[] = new String[1000];
-    private int index;
-    private List<LatLng> _points = new ArrayList<LatLng>();
+    private ImageButton add;
+    private ImageButton near;
+    private ImageButton traffic;
     
-    private String[] list = {"景點","民宿","餐廳","醫院"};
-    private String [] mapping = {"view", "stay", "restaurant", "hospital"};
+    private String index = "景點";
+    private int table_cnt = 0;
+    private List<LatLng> _points = new ArrayList<LatLng>();
+    private List<Data> _data = new ArrayList<Data>();
+    private List<String> _table = new ArrayList<String>();
+    private HashMap<String, String> hash = new HashMap<String, String>();
+    
     private ArrayAdapter<String> listAdapter;
     String lat[] = new String[1000];
 	String lng[] = new String[1000];
@@ -85,8 +92,8 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		      .setInterval(5000)         // 5 seconds
 		      .setFastestInterval(16)    // 16ms = 60fps
 		      .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-	
-    @Override
+
+	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -115,69 +122,215 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         map.setInfoWindowAdapter(new CustomInfoWindowAdapter());
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 13.0f));
         
-        btn = (Button)findViewById(R.id.get_record);
-        
-        //下拉式選單
         spin = (Spinner)findViewById(R.id.spinner1);
-        listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, list);
-        spin.setAdapter(listAdapter);
-        spin.setOnItemSelectedListener(new OnItemSelectedListener(){
-            @Override
-            public void onItemSelected(AdapterView<?> arg0, View arg1,int position, long arg3) {
-            	map.clear();
-                String select = "SELECT * FROM " + mapping[position];
-                index = position;
-                switch (position){
-                case 0:
-                	getView(select);
-                	break;
-                case 1:
-                	getStay(select);
-                	break;
-                case 2:
-                	getRestaurant(select);
-                	break;
-                case 3:
-                	getHospital(select);
-                	break;
-                }
-            }
-            @Override
-            public void onNothingSelected(AdapterView<?> arg0) {
-               // TODO Auto-generated method stub
-            }
+        
+        add = (ImageButton)findViewById(R.id.imageButton1);
+        add.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				final EditText context = new EditText(AndroidMap.this);
+				new AlertDialog.Builder(AndroidMap.this)
+				.setTitle("請輸入...")
+				.setIcon(android.R.drawable.ic_dialog_info)
+				.setView(context)
+				.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+			            try{
+			            	String result = DBConnector.executeQuery("create table " + context.getText().toString() + "(id integer auto_increment primary key,name char(20),site char(50),context char(100),lat decimal(9, 7), lng decimal(10,7));", "http://140.125.45.113/contest/post_mysql/travel.php");
+			            }catch(Exception e){
+			            	Toast.makeText(getApplicationContext(), "建立失敗", 5).show();
+			            }
+			        }
+				})
+				.show();
+			}
         });
         
+        near = (ImageButton)findViewById(R.id.imageButton2);
+        near.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				LatLng now = new LatLng(mLocationClient.getLastLocation().getLatitude(), mLocationClient.getLastLocation().getLongitude());
+				//select * from log where (121.690425 < longitude and longitude < 121.700425);
+				String input = "select * from " + index + " where (" + Double.toString(center.longitude-0.005) + " < lng and lng < " + Double.toString(center.longitude+0.005) + " and lat > " + Double.toString(center.latitude-0.005) + " and lat < " + Double.toString(center.latitude+0.005) + ");";
+				clear_Data();
+				try{
+					//String result = DBConnector.executeQuery(input, "http://140.125.45.113/contest/post_mysql/query_table.php");
+					//JSONArray jsonArray = new JSONArray(result);
+			        if(index.equals("景點")){
+			        	getView(input);
+			        	
+			        }else if(index.equals("民宿")){
+			        	getStay(input);
+			        	
+			        }else if(index.equals("餐廳")){
+			        	getRestaurant(input);
+			        	
+			        }else if(index.equals("醫院")){
+			        	getHospital(input);
+			        	
+			        }else{
+			        	getExtra(input);
+			        }
+		            /*for(int i = 0; i < jsonArray.length(); i++) {
+		                Data stop = new Data();
+		            	JSONObject jsonData = jsonArray.getJSONObject(i);
+		            	stop.id = jsonData.getString("id");
+		            	stop.name_tw = jsonData.getString("name");
+		            	stop.site_tw = jsonData.getString("site");
+		            	stop.context = jsonData.getString("context");
+		            	stop.lat = jsonData.getString("lat");
+		            	stop.lng = jsonData.getString("lng");
+		                map.addMarker(new MarkerOptions()
+			            .position(new LatLng(Double.valueOf(stop.lat), Double.valueOf(stop.lng)))
+			            .draggable(true)
+			            .snippet("\n位置: " + stop.site_tw + "\n情形: " + stop.context)
+			            .icon(BitmapDescriptorFactory.defaultMarker(210))
+			            .title(stop.name_tw));
+		                _data.add(stop);
+		                hash.put(stop.name_tw, stop.id);
+		                Toast.makeText(getApplicationContext(), jsonArray.getJSONObject(i).toString(), 5).show();
+		            }*/
+				}catch(Exception e){
+					Toast.makeText(getApplicationContext(), "ERROR", 5).show();
+				}
+			}
+        	
+        });
+        
+        traffic = (ImageButton)findViewById(R.id.traffic);
+        //traffic.setBackground(null);
+        traffic.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				Intent intent= new Intent();
+				intent.setClass(getApplicationContext(), Traffic.class);
+				startActivity(intent);
+			}
+        	
+        });
+    }
+    
+    public void get_Table(){
+    	_table.clear();
+    	try{
+        	String result = DBConnector.executeQuery("show tables;", "http://140.125.45.113/contest/post_mysql/query_table.php");
+        	JSONArray jsonArray = new JSONArray(result);
+        	for(int i = 0; i < jsonArray.length(); i++){
+        		_table.add(jsonArray.getJSONObject(i).getString("Tables_in_location").toString());
+        		//Toast.makeText(getApplicationContext(), jsonArray.getJSONObject(i).getString("Tables_in_location").toString(), 5).show();
+        	}
+        }catch(Exception e){
+        	Toast.makeText(getApplicationContext(), "建立失敗", 5).show();
+        }
+    	//下拉式選單
+    	if(_table.size() > table_cnt){
+    		table_cnt = _table.size();
+	    	listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, _table);
+	        spin.setAdapter(listAdapter);
+	        spin.setOnItemSelectedListener(new OnItemSelectedListener(){
+	            @Override
+	            public void onItemSelected(AdapterView<?> arg0, View arg1,final int position, long arg3) {
+	            	
+	            	final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, "abc", "Loading", true);
+
+	                new Thread(){
+	                public void run(){
+	                try{
+	                	//get_Data(_table.get(position));
+	                	sleep(2000);
+	                }
+	                catch(Exception e){
+	                e.printStackTrace();
+	                }
+	                finally{
+	               PDialog.dismiss();
+	                 }
+	                }
+	               }.start();
+	               get_Data(_table.get(position));
+	            }
+	            @Override
+	            public void onNothingSelected(AdapterView<?> arg0) {
+	               // TODO Auto-generated method stub
+	            }
+	        });
+    	}
+    }
+    
+    public void get_Data(String position){
+    	clear_Data();
+        String select = "SELECT * FROM " + position;
+        index = position;
+        if(index.equals("景點")){
+        	getView(select);
+        	
+        }else if(index.equals("民宿")){
+        	getStay(select);
+        	
+        }else if(index.equals("餐廳")){
+        	getRestaurant(select);
+        	
+        }else if(index.equals("醫院")){
+        	getHospital(select);
+        	
+        }else{
+        	getExtra(select);
+        }
+        /*switch (_table.get(position)){
+        case 0:
+        	getView(select);
+        	break;
+        case 1:
+        	getStay(select);
+        	break;
+        case 2:
+        	getRestaurant(select);
+        	break;
+        case 3:
+        	getHospital(select);
+        	break;
+        }*/
     }
     
     //抓取民宿資料庫資料
     public void getStay(String select){
     	try {
-            String result = DBConnector.executeQuery(select);
+            String result = DBConnector.executeQuery(select, "http://140.125.45.113/contest/travel.php");
             /*
                 SQL 結果有多筆資料時使用JSONArray
                                                                   只有一筆資料時直接建立JSONObject物件
                 JSONObject jsonData = new JSONObject(result);
             */
-            String name_tw, name_en, phone, fax, website, email, site_tw, site_en, lat, lng;
             JSONArray jsonArray = new JSONArray(result);
             for(int i = 0; i < jsonArray.length(); i++) {
+                Data stay = new Data();
             	JSONObject jsonData = jsonArray.getJSONObject(i);
-                name_tw = jsonData.getString("中文名稱");
-                name_en = jsonData.getString("英文名稱");
-                phone = jsonData.getString("聯絡電話");
-                fax = jsonData.getString("傳真");
-                website = jsonData.getString("網址");
-                email = jsonData.getString("EMAIL");
-                site_tw = jsonData.getString("中文地址");
-                site_en = jsonData.getString("英文地址");
-                lat = jsonData.getString("lat");
-                lng = jsonData.getString("lng");
+            	stay.id = jsonData.getString("民宿編號");
+				stay.name_tw = jsonData.getString("中文名稱");
+                stay.name_en = jsonData.getString("英文名稱");
+                stay.phone = jsonData.getString("聯絡電話");
+                stay.fax = jsonData.getString("傳真");
+                stay.website = jsonData.getString("網址");
+                stay.email = jsonData.getString("EMAIL");
+                stay.site_tw = jsonData.getString("中文地址");
+                stay.site_en = jsonData.getString("英文地址");
+                stay.lat = jsonData.getString("lat");
+                stay.lng = jsonData.getString("lng");
                 map.addMarker(new MarkerOptions()
-	            .position(new LatLng(Double.valueOf(lat), Double.valueOf(lng)))
+	            .position(new LatLng(Double.valueOf(stay.lat), Double.valueOf(stay.lng)))
 	            .draggable(true)
-	            .snippet("連絡電話: " + phone + "\n傳真: " + fax + "\n網址: " + website + "\nEMAIL: " + email + "\n中文地址: " + site_tw + "\n英文地址: " + site_en)
-	            .title(name_tw));
+	            .snippet("連絡電話: " + stay.phone + "\n傳真: " + stay.fax + "\n網址: " + stay.website + "\nEMAIL: " + stay.email + "\n中文地址: " + stay.site_tw + "\n英文地址: " + stay.site_en)
+	            .title(stay.name_tw));
+                _data.add(stay);
+                hash.put(stay.name_tw, stay.id);
             }
         } catch(Exception e) {
             // Log.e("log_tag", e.toString());
@@ -188,26 +341,29 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     //抓取醫院資料庫資料
     public void getHospital(String select){
     	try {
-            String result = DBConnector.executeQuery(select);
+            String result = DBConnector.executeQuery(select, "http://140.125.45.113/contest/travel.php");
             /*
                 SQL 結果有多筆資料時使用JSONArray
                                                                   只有一筆資料時直接建立JSONObject物件
                 JSONObject jsonData = new JSONObject(result);
             */
-            String name_tw, phone, site_tw, lat, lng;
             JSONArray jsonArray = new JSONArray(result);
             for(int i = 0; i < jsonArray.length(); i++) {
+                Data hospital = new Data();
             	JSONObject jsonData = jsonArray.getJSONObject(i);
-                name_tw = jsonData.getString("醫院名稱");
-                phone = jsonData.getString("電話");
-                site_tw = jsonData.getString("地址");
-                lat = jsonData.getString("lat");
-                lng = jsonData.getString("lng");
+            	hospital.id = jsonData.getString("序號");
+            	hospital.name_tw = jsonData.getString("醫院名稱");
+            	hospital.phone = jsonData.getString("電話");
+            	hospital.site_tw = jsonData.getString("地址");
+            	hospital.lat = jsonData.getString("lat");
+            	hospital.lng = jsonData.getString("lng");
                 map.addMarker(new MarkerOptions()
-	            .position(new LatLng(Double.valueOf(lat), Double.valueOf(lng)))
+	            .position(new LatLng(Double.valueOf(hospital.lat), Double.valueOf(hospital.lng)))
 	            .draggable(true)
-	            .snippet("連絡電話: " + phone + "\n中文地址: " + site_tw)
-	            .title(name_tw));
+	            .snippet("連絡電話: " + hospital.phone + "\n中文地址: " + hospital.site_tw)
+	            .title(hospital.name_tw));
+                _data.add(hospital);
+                hash.put(hospital.name_tw, hospital.id);
             }
         } catch(Exception e) {
             // Log.e("log_tag", e.toString());
@@ -218,27 +374,29 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     //抓取景點資料庫資料
     public void getView(String select){
     	try {
-            String result = DBConnector.executeQuery(select);
+            String result = DBConnector.executeQuery(select, "http://140.125.45.113/contest/travel.php");
             /*
                 SQL 結果有多筆資料時使用JSONArray
                                                                   只有一筆資料時直接建立JSONObject物件
                 JSONObject jsonData = new JSONObject(result);
             */
-            String name_tw, phone, site_tw, lat, lng;
             JSONArray jsonArray = new JSONArray(result);
             for(int i = 0; i < jsonArray.length(); i++) {
+                Data view = new Data();
             	JSONObject jsonData = jsonArray.getJSONObject(i);
-                name_tw = jsonData.getString("地點");
-                phone = jsonData.getString("電話");
-                site_tw = jsonData.getString("地址");
-                lat = jsonData.getString("lat");
-                lng = jsonData.getString("lng");
+            	view.id = jsonData.getString("id");
+                view.name_tw = jsonData.getString("地點");
+                view.phone = jsonData.getString("電話");
+                view.site_tw = jsonData.getString("地址");
+                view.lat = jsonData.getString("lat");
+                view.lng = jsonData.getString("lng");
                 map.addMarker(new MarkerOptions()
-	            .position(new LatLng(Double.valueOf(lat), Double.valueOf(lng)))
-	            .draggable(true)
-	            .snippet("連絡電話: " + phone + "\n中文地址: " + site_tw)
+	            .position(new LatLng(Double.valueOf(view.lat), Double.valueOf(view.lng)))
+	            .snippet("連絡電話: " + view.phone + "\n中文地址: " + view.site_tw)
 	            .icon(BitmapDescriptorFactory.defaultMarker(120))
-	            .title(name_tw));
+	            .title(view.name_tw));
+                _data.add(view);
+                hash.put(view.name_tw, view.id);
             }
         } catch(Exception e) {
             // Log.e("log_tag", e.toString());
@@ -249,32 +407,69 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     //抓取餐廳資料庫資料
     public void getRestaurant(String select){
     	try {
-            String result = DBConnector.executeQuery(select);
+            String result = DBConnector.executeQuery(select, "http://140.125.45.113/contest/travel.php");
             /*
                 SQL 結果有多筆資料時使用JSONArray
                                                                   只有一筆資料時直接建立JSONObject物件
                 JSONObject jsonData = new JSONObject(result);
             */
-            String name_tw, people, phone, site_tw, lat, lng;
             JSONArray jsonArray = new JSONArray(result);
             for(int i = 0; i < jsonArray.length(); i++) {
+                Data restaurant = new Data();
             	JSONObject jsonData = jsonArray.getJSONObject(i);
-                name_tw = jsonData.getString("餐廳名稱");
-                people = jsonData.getString("負責人");
-                phone = jsonData.getString("電話");
-                site_tw = jsonData.getString("地址");
-                lat = jsonData.getString("lat");
-                lng = jsonData.getString("lng");
+            	restaurant.id = jsonData.getString("編號");
+            	restaurant.name_tw = jsonData.getString("餐廳名稱");
+            	restaurant.people = jsonData.getString("負責人");
+            	restaurant.phone = jsonData.getString("電話");
+            	restaurant.site_tw = jsonData.getString("地址");
+            	restaurant.lat = jsonData.getString("lat");
+            	restaurant.lng = jsonData.getString("lng");
                 map.addMarker(new MarkerOptions()
-	            .position(new LatLng(Double.valueOf(lat), Double.valueOf(lng)))
+	            .position(new LatLng(Double.valueOf(restaurant.lat), Double.valueOf(restaurant.lng)))
 	            .draggable(true)
-	            .snippet("連絡電話: " + phone + "\n負責人: " + people + "\n中文地址: " + site_tw)
+	            .snippet("連絡電話: " + restaurant.phone + "\n負責人: " + restaurant.people + "\n中文地址: " + restaurant.site_tw)
 	            .icon(BitmapDescriptorFactory.defaultMarker(210))
-	            .title(name_tw));
+	            .title(restaurant.name_tw));
+                _data.add(restaurant);
+                hash.put(restaurant.name_tw, restaurant.id);
             }
         } catch(Exception e) {
             // Log.e("log_tag", e.toString());
         	Toast.makeText(AndroidMap.this, "Failed", 5).show();
+        }
+    }
+    
+  //抓取其他地圖資料庫資料
+    public void getExtra(String select){
+    	try {
+            String result = DBConnector.executeQuery(select, "http://140.125.45.113/contest/travel.php");
+            /*
+                SQL 結果有多筆資料時使用JSONArray
+                                                                  只有一筆資料時直接建立JSONObject物件
+                JSONObject jsonData = new JSONObject(result);
+            */
+            JSONArray jsonArray = new JSONArray(result);
+            for(int i = 0; i < jsonArray.length(); i++) {
+                Data stop = new Data();
+            	JSONObject jsonData = jsonArray.getJSONObject(i);
+            	stop.id = jsonData.getString("id");
+            	stop.name_tw = jsonData.getString("name");
+            	stop.site_tw = jsonData.getString("site");
+            	stop.context = jsonData.getString("context");
+            	stop.lat = jsonData.getString("lat");
+            	stop.lng = jsonData.getString("lng");
+                map.addMarker(new MarkerOptions()
+	            .position(new LatLng(Double.valueOf(stop.lat), Double.valueOf(stop.lng)))
+	            .draggable(true)
+	            .snippet("\n位置: " + stop.site_tw + "\n情形: " + stop.context)
+	            .icon(BitmapDescriptorFactory.defaultMarker(210))
+	            .title(stop.name_tw));
+                _data.add(stop);
+                hash.put(stop.name_tw, stop.id);
+            }
+        } catch(Exception e) {
+            // Log.e("log_tag", e.toString());
+        	Toast.makeText(AndroidMap.this, "尚未有地圖資訊", 5).show();
         }
     }
     
@@ -364,6 +559,139 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     	}
     }
     
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// TODO Auto-generated method stub
+    	
+		return super.onCreateOptionsMenu(menu);
+	}
+
+	public void Modify(String name){
+    	Intent intent = new Intent();
+    	Bundle bundle = new Bundle();
+		String data_id = hash.get(name).toString();
+		if(index.equals("景點")){
+			intent.setClass(AndroidMap.this, Modify_view.class);
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("phone", _data.get(Integer.valueOf(data_id)-1).phone);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
+        	
+        }else if(index.equals("民宿")){
+        	intent.setClass(AndroidMap.this, Modify_stay.class);
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("name_en", _data.get(Integer.valueOf(data_id)-1).name_en);
+    		bundle.putString("phone", _data.get(Integer.valueOf(data_id)-1).phone);
+    		bundle.putString("fax", _data.get(Integer.valueOf(data_id)-1).fax);
+    		bundle.putString("website", _data.get(Integer.valueOf(data_id)-1).website);
+    		bundle.putString("email", _data.get(Integer.valueOf(data_id)-1).email);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("site_en", _data.get(Integer.valueOf(data_id)-1).site_en);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
+        	
+        }else if(index.equals("餐廳")){
+        	intent.setClass(AndroidMap.this, Modify_restaurant.class);
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("people", _data.get(Integer.valueOf(data_id)-1).people);
+    		bundle.putString("phone", _data.get(Integer.valueOf(data_id)-1).phone);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
+        	
+        }else if(index.equals("醫院")){
+        	intent.setClass(AndroidMap.this, Modify_hospital.class);
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("phone", _data.get(Integer.valueOf(data_id)-1).phone);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
+        	
+        }else{
+        	intent.setClass(AndroidMap.this, Modify_extra.class);
+        	bundle.putString("select", index);
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("context", _data.get(Integer.valueOf(data_id)-1).context);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
+        }
+    	/*switch (index){
+    	case 0:
+    		intent.setClass(AndroidMap.this, Modify_view.class);
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("phone", _data.get(Integer.valueOf(data_id)-1).phone);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
+    		break;
+    	case 1:
+    		intent.setClass(AndroidMap.this, Modify_stay.class);
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("name_en", _data.get(Integer.valueOf(data_id)-1).name_en);
+    		bundle.putString("phone", _data.get(Integer.valueOf(data_id)-1).phone);
+    		bundle.putString("fax", _data.get(Integer.valueOf(data_id)-1).fax);
+    		bundle.putString("website", _data.get(Integer.valueOf(data_id)-1).website);
+    		bundle.putString("email", _data.get(Integer.valueOf(data_id)-1).email);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("site_en", _data.get(Integer.valueOf(data_id)-1).site_en);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
+    		break;
+    	case 2:
+    		intent.setClass(AndroidMap.this, Modify_restaurant.class);
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("people", _data.get(Integer.valueOf(data_id)-1).people);
+    		bundle.putString("phone", _data.get(Integer.valueOf(data_id)-1).phone);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
+    		break;
+    	case 3:
+    		intent.setClass(AndroidMap.this, Modify_hospital.class);
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("phone", _data.get(Integer.valueOf(data_id)-1).phone);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
+    		break;
+    	}*/
+    	intent.putExtras(bundle);
+        startActivity(intent);
+    }
+    
+    class Data {
+    	String id;
+    	String name_tw;
+    	String name_en;
+    	String people;
+    	String phone;
+    	String fax;
+    	String email;
+    	String website;
+    	String site_tw;
+    	String site_en;
+    	String context;
+    	String lat;
+    	String lng;
+    }
+    
+    private void clear_Data(){
+    	map.clear();
+    	hash.clear();
+    	_data.clear();
+    }
+    
     /*
      * 客製化marker介面
      */
@@ -390,7 +718,24 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
             int badge=R.drawable.badge_qld;
             // Use the equals() method on a Marker to check for equals.  Do not use ==.
             //if (marker.equals(mBrisbane)) {
-            switch (index){
+            
+            if(index.equals("景點")){
+            	badge = R.drawable.landscape;
+            	
+            }else if(index.equals("民宿")){
+            	
+            	
+            }else if(index.equals("餐廳")){
+            	
+            	
+            }else if(index.equals("醫院")){
+            	badge = R.drawable.hospital;
+            	
+            }else{
+            	
+            }
+            
+            /*switch (index){
             case 0:
                 badge = R.drawable.landscape;
                 break;
@@ -401,7 +746,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
             case 3:
             	badge = R.drawable.hospital;
             	break;
-            }
+            }*/
             
             ((ImageView) view.findViewById(R.id.badge)).setImageResource(badge);
             //marker標題設定
@@ -436,17 +781,24 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
         mLocationClient.connect();
+        get_Table();
+        get_Data(index);
     }
-    
-    @Override
+
+	@Override
     public void onPause() {
     	super.onPause();
 	    if (mLocationClient != null) {
 	    	mLocationClient.disconnect();
 	    }
     }
+    @Override
+	public void onWindowFocusChanged(boolean hasFocus) {
+		// TODO Auto-generated method stub
+    	get_Table();
+	}
 
-    private void setUpMapIfNeeded() {
+	private void setUpMapIfNeeded() {
         if (map == null) {
             map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
                     .getMap();
@@ -491,11 +843,28 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     	new AlertDialog.Builder(AndroidMap.this)
         .setTitle("要進行動作...")
         .setMessage("要新增地圖資訊?")
-        .setNegativeButton("是", new DialogInterface.OnClickListener() {
+        .setPositiveButton("是", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
             	Intent intent = new Intent();
-            	switch (index){
+            	Bundle bundle = new Bundle();
+            	if(index.equals("景點")){
+            		intent.setClass(AndroidMap.this, Add_view.class);
+                	
+                }else if(index.equals("民宿")){
+                	intent.setClass(AndroidMap.this, Add_stay.class);
+                	
+                }else if(index.equals("餐廳")){
+                	intent.setClass(AndroidMap.this, Add_restaurant.class);
+                	
+                }else if(index.equals("醫院")){
+                	intent.setClass(AndroidMap.this, Add_hospital.class);
+                	
+                }else{
+                	intent.setClass(AndroidMap.this, Add_extra.class);
+                	bundle.putString("select", index);
+                }
+            	/*switch (index){
 	            	case 0:
 	            		intent.setClass(AndroidMap.this, Add_view.class);
 	            		break;
@@ -508,8 +877,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	            	case 3:
 	            		intent.setClass(AndroidMap.this, Add_hospital.class);
 	            		break;
-            	}
-            	Bundle bundle = new Bundle();
+            	}*/
             	bundle.putDouble("lat", point.latitude);
                 bundle.putDouble("lng", point.longitude);
             	//將Bundle物件assign給intent
@@ -519,7 +887,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
             	//Toast.makeText(getApplicationContext(),result, Toast.LENGTH_SHORT).show();
             }
         })
-        .setPositiveButton("否", new DialogInterface.OnClickListener() {
+        .setNegativeButton("否", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 
@@ -582,9 +950,24 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 				if (dialog != null) dialog.dismiss();
 				switch(which){
 				case 0:
+					Modify(marker.getTitle());
 					break;
 				case 1:
-					GetDirection(marker.getPosition());
+					final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, "abc", "Loading", true);
+	                new Thread(){
+		                public void run(){
+			                try{
+			                	//GetDirection(marker.getPosition());
+			                	sleep(2000);
+			                }catch(Exception e){
+			                	e.printStackTrace();
+			                }
+			                finally{
+			                	PDialog.dismiss();
+				            }
+		                }
+	               }.start();
+					//GetDirection(marker.getPosition());
 					break;
 				case 2:
 					//
