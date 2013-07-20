@@ -24,7 +24,8 @@
         android:id="@+id/user"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:ems="10" >
+        android:ems="10" 
+        android:hint="Pls key name...">
         <requestFocus />
     </EditText>
         
@@ -38,7 +39,8 @@
              android:id="@+id/name_tw"
              android:layout_width="fill_parent"
              android:layout_height="wrap_content"
-             android:ems="10" >
+             android:ems="10" 
+             android:hint="Pls key hostel chinese name...">
              
          </EditText>
 
@@ -52,7 +54,8 @@
             android:id="@+id/name_en"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key hostel english name..."/>
 
         <TextView
             android:id="@+id/textView3"
@@ -64,7 +67,8 @@
             android:id="@+id/phone"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key phone number..."/>
 
         <TextView
             android:id="@+id/textView6"
@@ -76,7 +80,8 @@
             android:id="@+id/fax"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key fax number..."/>
 
         <TextView
             android:id="@+id/textView7"
@@ -88,7 +93,8 @@
             android:id="@+id/website"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key website..."/>
         
        <TextView
             android:id="@+id/textView8"
@@ -100,7 +106,8 @@
             android:id="@+id/email"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key email address..."/>
 
         <TextView
             android:id="@+id/textView2"
@@ -113,7 +120,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key chinese address..."/>
 
         <TextView
             android:id="@+id/textView4"
@@ -126,7 +134,8 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key english address..."/>
     
     <Button
         android:id="@+id/submit"

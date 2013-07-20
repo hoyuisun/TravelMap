@@ -14,7 +14,8 @@
         android:id="@+id/editText1"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:ems="10" >
+        android:ems="10" 
+        android:hint="Pls key name...">
         
              <requestFocus />
          </EditText>
@@ -29,7 +30,8 @@
              android:id="@+id/name"
              android:layout_width="fill_parent"
              android:layout_height="wrap_content"
-             android:ems="10" />
+             android:ems="10" 
+             android:hint="Pls key restaurant's name..."/>
 
 
         <TextView
@@ -42,7 +44,8 @@
             android:id="@+id/people"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key owner..."/>
         
         <TextView
             android:id="@+id/textView2"
@@ -54,7 +57,8 @@
             android:id="@+id/site"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key address..."/>
 
         <TextView
             android:id="@+id/textView3"
@@ -66,7 +70,8 @@
             android:id="@+id/phone"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key phone number..."/>
 
     <Button
         android:id="@+id/submit"

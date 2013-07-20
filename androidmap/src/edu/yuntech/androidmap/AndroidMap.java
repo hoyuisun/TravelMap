@@ -20,6 +20,7 @@ import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,6 +35,7 @@ import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.AdapterView;
@@ -75,8 +77,13 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     private ImageButton add;
     private ImageButton near;
     private ImageButton traffic;
+    private ImageButton weather;
+    private ImageButton star;
+    private ImageButton plan;
+    private ImageButton push;
+    private boolean starting = false;
     
-    private String index = "景點";
+    private String index = null;
     private int table_cnt = 0;
     private List<LatLng> _points = new ArrayList<LatLng>();
     private List<Data> _data = new ArrayList<Data>();
@@ -96,8 +103,14 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        /*requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+        		WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
+
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-        
+     
+        //setProgressBarIndeterminateVisibility(true);
         /*
          *此段必要!! 
          *用來抓取mysql資訊, 拿掉無法抓取
@@ -123,6 +136,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(center, 13.0f));
         
         spin = (Spinner)findViewById(R.id.spinner1);
+        get_Table();
         
         add = (ImageButton)findViewById(R.id.imageButton1);
         add.setOnClickListener(new OnClickListener(){
@@ -140,6 +154,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 					public void onClick(DialogInterface dialog, int which) {
 			            try{
 			            	String result = DBConnector.executeQuery("create table " + context.getText().toString() + "(id integer auto_increment primary key,name char(20),site char(50),context char(100),lat decimal(9, 7), lng decimal(10,7));", "http://140.125.45.113/contest/post_mysql/travel.php");
+			            	index = context.getText().toString();
 			            }catch(Exception e){
 			            	Toast.makeText(getApplicationContext(), "建立失敗", 5).show();
 			            }
@@ -216,6 +231,58 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 			}
         	
         });
+        
+        weather = (ImageButton)findViewById(R.id.weather);
+        weather.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				Intent intent= new Intent();
+				Bundle bundle = new Bundle();
+				bundle.putInt("web", 3);
+				intent.putExtras(bundle);
+				intent.setClass(getApplicationContext(), Web_view.class);
+				startActivity(intent);
+			}
+        	
+        });
+        
+        star = (ImageButton)findViewById(R.id.star);
+        star.setOnClickListener(new OnClickListener(){
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				Intent intent= new Intent();
+				Bundle bundle = new Bundle();
+				bundle.putInt("web", 4);
+				intent.putExtras(bundle);
+				intent.setClass(getApplicationContext(), Web_view.class);
+				startActivity(intent);
+			}
+        	
+        });
+        
+        plan = (ImageButton)findViewById(R.id.plan);
+        plan.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+        	
+        });
+        
+        push = (ImageButton)findViewById(R.id.push);
+        push.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+        	
+        });
     }
     
     public void get_Table(){
@@ -227,6 +294,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         		_table.add(jsonArray.getJSONObject(i).getString("Tables_in_location").toString());
         		//Toast.makeText(getApplicationContext(), jsonArray.getJSONObject(i).getString("Tables_in_location").toString(), 5).show();
         	}
+        	//starting = true;
         }catch(Exception e){
         	Toast.makeText(getApplicationContext(), "建立失敗", 5).show();
         }
@@ -235,25 +303,21 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     		table_cnt = _table.size();
 	    	listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, _table);
 	        spin.setAdapter(listAdapter);
+	        spin.setSelection(_table.indexOf(index));
 	        spin.setOnItemSelectedListener(new OnItemSelectedListener(){
 	            @Override
 	            public void onItemSelected(AdapterView<?> arg0, View arg1,final int position, long arg3) {
-	            	
-	            	final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, "abc", "Loading", true);
-
+	            	final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, null, "正在載入...", true);
 	                new Thread(){
-	                public void run(){
-	                try{
-	                	//get_Data(_table.get(position));
-	                	sleep(2000);
-	                }
-	                catch(Exception e){
-	                e.printStackTrace();
-	                }
-	                finally{
-	               PDialog.dismiss();
-	                 }
-	                }
+		                public void run(){
+			                try{
+			                	Thread.sleep(3000);
+			                }catch(Exception e){
+			                	e.printStackTrace();
+			                }finally{
+			                	PDialog.dismiss();
+			                }
+			            }
 	               }.start();
 	               get_Data(_table.get(position));
 	            }
@@ -284,6 +348,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         }else{
         	getExtra(select);
         }
+    	starting = true;
         /*switch (_table.get(position)){
         case 0:
         	getView(select);
@@ -781,8 +846,10 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
         mLocationClient.connect();
-        get_Table();
-        get_Data(index);
+        if(starting == true){
+	        get_Table();
+	        get_Data(index);
+        }
     }
 
 	@Override
@@ -795,7 +862,8 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     @Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		// TODO Auto-generated method stub
-    	get_Table();
+    	if(starting == true)
+    		get_Table();
 	}
 
 	private void setUpMapIfNeeded() {
@@ -953,12 +1021,11 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 					Modify(marker.getTitle());
 					break;
 				case 1:
-					final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, "abc", "Loading", true);
+					final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, null, "路徑規劃中", true);
 	                new Thread(){
 		                public void run(){
 			                try{
-			                	//GetDirection(marker.getPosition());
-			                	sleep(2000);
+			                	sleep(4000);
 			                }catch(Exception e){
 			                	e.printStackTrace();
 			                }
@@ -967,7 +1034,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 				            }
 		                }
 	               }.start();
-					//GetDirection(marker.getPosition());
+					GetDirection(marker.getPosition());
 					break;
 				case 2:
 					//

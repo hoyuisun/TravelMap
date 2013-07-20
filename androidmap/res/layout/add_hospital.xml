@@ -14,7 +14,8 @@
         android:id="@+id/user"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10" >
+        android:ems="10" 
+        android:hint="Pls key name...">
              <requestFocus />
          </EditText>
 
@@ -28,7 +29,8 @@
              android:id="@+id/name"
              android:layout_width="match_parent"
              android:layout_height="wrap_content"
-             android:ems="10" >
+             android:ems="10" 
+             android:hint="Pls key hospital's name...">
 
          </EditText>
 
@@ -42,7 +44,8 @@
             android:id="@+id/site"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key address..."/>
 
         <TextView
             android:id="@+id/textView3"
@@ -54,7 +57,8 @@
             android:id="@+id/phone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10" />
+            android:ems="10" 
+            android:hint="Pls key phone number..."/>
     <Button
         android:id="@+id/submit"
         android:layout_width="wrap_content"

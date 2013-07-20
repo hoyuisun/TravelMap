@@ -16,6 +16,7 @@ public class Traffic extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.traffic);
+        setTitle("交通資訊");
         ListView list = (ListView) findViewById(R.id.listView1);
         list.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, mStrings));
         list.setOnItemClickListener(new OnItemClickListener(){
