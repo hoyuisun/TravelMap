@@ -140,12 +140,9 @@ int layout web_view 0x7f03000f
 int menu main 0x7f090000
 int string action_settings 0x7f060016
 int string app_name 0x7f060015
-int string auth_client_needs_enabling_title 0x7f060010
-int string auth_client_needs_installation_title 0x7f060011
-int string auth_client_needs_update_title 0x7f060012
-int string auth_client_play_services_err_notification_msg 0x7f060013
-int string auth_client_requested_by_msg 0x7f060014
-int string auth_client_using_bad_version_title 0x7f06000f
+int string auth_client_availability_notification_title 0x7f06000f
+int string auth_client_play_services_err_notification_msg 0x7f060010
+int string auth_client_requested_by_msg 0x7f060011
 int string common_google_play_services_enable_button 0x7f060006
 int string common_google_play_services_enable_text 0x7f060005
 int string common_google_play_services_enable_title 0x7f060004
@@ -162,6 +159,9 @@ int string common_google_play_services_update_title 0x7f060007
 int string common_signin_button_text 0x7f06000d
 int string common_signin_button_text_long 0x7f06000e
 int string hello_world 0x7f060017
+int string location_client_ulr_inactive_age_under_13 0x7f060012
+int string location_client_ulr_inactive_age_unknown 0x7f060013
+int string location_client_ulr_inactive_unknown_restriction 0x7f060014
 int style AppBaseTheme 0x7f080000
 int style AppTheme 0x7f080001
 int[] styleable MapAttrs { 0x7f010000, 0x7f010001, 0x7f010002, 0x7f010003, 0x7f010004, 0x7f010005, 0x7f010006, 0x7f010007, 0x7f010008, 0x7f010009, 0x7f01000a, 0x7f01000b, 0x7f01000c, 0x7f01000d }

@@ -26,6 +26,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
@@ -35,7 +36,6 @@ import android.text.style.ForegroundColorSpan;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.view.animation.BounceInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.AdapterView;
@@ -85,6 +85,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     
     private String index = null;
     private int table_cnt = 0;
+    private int select = 0;
     private List<LatLng> _points = new ArrayList<LatLng>();
     private List<Data> _data = new ArrayList<Data>();
     private List<String> _table = new ArrayList<String>();
@@ -107,7 +108,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
         		WindowManager.LayoutParams.FLAG_FULLSCREEN);*/
 
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
      
         //setProgressBarIndeterminateVisibility(true);
@@ -307,7 +308,9 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	        spin.setOnItemSelectedListener(new OnItemSelectedListener(){
 	            @Override
 	            public void onItemSelected(AdapterView<?> arg0, View arg1,final int position, long arg3) {
-	            	final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, null, "正在載入...", true);
+	            	select = 0;
+	            	new asyncTaskProgress().execute(_table.get(position));
+	            	/*final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, null, "正在載入...", true);
 	                new Thread(){
 		                public void run(){
 			                try{
@@ -319,7 +322,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 			                }
 			            }
 	               }.start();
-	               get_Data(_table.get(position));
+	               get_Data(_table.get(position));*/
 	            }
 	            @Override
 	            public void onNothingSelected(AdapterView<?> arg0) {
@@ -751,6 +754,49 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     	String lng;
     }
     
+    public class asyncTaskProgress extends AsyncTask<String, Void, Void>{
+    	
+    	String input[] = new String[2];
+    	ProgressDialog PDialog;
+    	
+		@Override
+		protected void onPostExecute(Void result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			if(select == 0)
+				get_Data(input[0]);
+			else{
+				GetDirection(new LatLng(Double.valueOf(input[0]), Double.valueOf(input[1])));
+			}
+			PDialog.dismiss();
+			show_Dialog(select);
+		}
+
+		@Override
+		protected void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			if(select == 0)
+				PDialog = PDialog.show(AndroidMap.this, null, "正在載入...");
+			else
+				PDialog = PDialog.show(AndroidMap.this, null, "規劃路徑中...");
+		}
+
+		@Override
+		protected Void doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			try {
+				for(int i = 0; i < params.length; i++)
+					input[i] = params[i];
+				Thread.sleep(3000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+    }
+    
     private void clear_Data(){
     	map.clear();
     	hash.clear();
@@ -865,7 +911,28 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     	if(starting == true)
     		get_Table();
 	}
-
+    private void show_Dialog(int flag){
+    	Builder dialog = new AlertDialog.Builder(AndroidMap.this);
+        
+    	if(flag == 0){
+    		dialog.setTitle("資料")
+            .setMessage("\"" + index + "\"" + " 資訊已載入至地圖")
+            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+    	}else{
+    		dialog.setTitle("規劃")
+            .setMessage("路徑規劃執行已完成")
+            .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+    	}
+    	dialog.show();
+    }
 	private void setUpMapIfNeeded() {
         if (map == null) {
             map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))
@@ -1021,7 +1088,9 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 					Modify(marker.getTitle());
 					break;
 				case 1:
-					final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, null, "路徑規劃中", true);
+					select = 1;
+					new asyncTaskProgress().execute(Double.toString(marker.getPosition().latitude), Double.toString(marker.getPosition().longitude));
+					/*final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, null, "路徑規劃中", true);
 	                new Thread(){
 		                public void run(){
 			                try{
@@ -1034,7 +1103,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 				            }
 		                }
 	               }.start();
-					GetDirection(marker.getPosition());
+					GetDirection(marker.getPosition());*/
 					break;
 				case 2:
 					//
