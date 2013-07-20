@@ -1,5 +1,10 @@
 package edu.yuntech.androidmap;
 
+import static edu.yuntech.androidmap.CommonUtilities.SENDER_ID;
+import static edu.yuntech.androidmap.CommonUtilities.DISPLAY_MESSAGE_ACTION;
+import static edu.yuntech.androidmap.CommonUtilities.EXTRA_MESSAGE;
+import static edu.yuntech.androidmap.CommonUtilities.SENDER_ID;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,8 +27,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -33,6 +41,7 @@ import android.os.StrictMode;
 import android.os.SystemClock;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -48,6 +57,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
 import com.google.android.gms.common.GooglePlayServicesClient.OnConnectionFailedListener;
@@ -84,6 +94,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     private boolean starting = false;
     
     private String index = null;
+    private String regId;
     private int table_cnt = 0;
     private int select = 0;
     private List<LatLng> _points = new ArrayList<LatLng>();
@@ -100,7 +111,22 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		      .setInterval(5000)         // 5 seconds
 		      .setFastestInterval(16)    // 16ms = 60fps
 		      .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-
+	
+	// label to display gcm messages
+		TextView lblMessage;
+		
+		// Asyntask
+		AsyncTask<Void, Void, Void> mRegisterTask;
+		
+		// Alert dialog manager
+		AlertDialogManager alert = new AlertDialogManager();
+		
+		// Connection detector
+		ConnectionDetector cd;
+		
+	public static String name;
+	public static String email;
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -280,12 +306,104 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 			@Override
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
-				
+				register();
 			}
         	
         });
     }
     
+	public void register(){
+		cd = new ConnectionDetector(getApplicationContext());
+
+		// Check if Internet present
+		if (!cd.isConnectingToInternet()) {
+			// Internet Connection is not present
+			alert.showAlertDialog(AndroidMap.this,
+					"Internet Connection Error",
+					"Please connect to working Internet connection", false);
+			// stop executing code by return
+			return;
+		}
+		
+		// Getting name, email from intent
+		
+		name = "Jin";
+		email = "u9917010@yuntech.edu.tw";	
+		
+		// Make sure the device has the proper dependencies.
+		GCMRegistrar.checkDevice(this);
+
+		// Make sure the manifest was properly set - comment out this line
+		// while developing the app, then uncomment it when it's ready.
+		GCMRegistrar.checkManifest(this);
+
+		lblMessage = (TextView) findViewById(R.id.lblMessage);
+		
+		registerReceiver(mHandleMessageReceiver, new IntentFilter(
+				DISPLAY_MESSAGE_ACTION));
+		// Get GCM registration id
+		final String regId = GCMRegistrar.getRegistrationId(this);
+		
+		if (regId.equals("")) {
+			// Registration is not present, register now with GCM			
+			GCMRegistrar.register(this, SENDER_ID);
+		}else{ 
+		
+			// Device is already registered on GCM
+			if (GCMRegistrar.isRegisteredOnServer(this)) {
+				// Skips registration.				
+				Toast.makeText(getApplicationContext(), "Already registered with GCM", Toast.LENGTH_LONG).show();
+			} else {
+				// Try to register again, but not in the UI thread.
+				// It's also necessary to cancel the thread onDestroy(),
+				// hence the use of AsyncTask instead of a raw thread.
+				final Context context = this;
+				mRegisterTask = new AsyncTask<Void, Void, Void>() {
+
+					@Override
+					protected Void doInBackground(Void... params) {
+						// Register on our server
+						// On server creates a new user
+						ServerUtilities.register(context, name, email, regId);
+						return null;
+					}
+
+					@Override
+					protected void onPostExecute(Void result) {
+						mRegisterTask = null;
+					}
+
+				};
+				mRegisterTask.execute(null, null, null);
+			}
+		}
+	}
+	
+	/**
+	 * Receiving push messages
+	 * */
+	private final BroadcastReceiver mHandleMessageReceiver = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			String newMessage = intent.getExtras().getString(EXTRA_MESSAGE);
+			// Waking up mobile if it is sleeping
+			WakeLocker.acquire(getApplicationContext());
+			
+			/**
+			 * Take appropriate action on this message
+			 * depending upon your app requirement
+			 * For now i am just displaying it on the screen
+			 * */
+			
+			// Showing received message
+			lblMessage.append(newMessage + "\n");			
+			Toast.makeText(getApplicationContext(), "New Message: " + newMessage, Toast.LENGTH_LONG).show();
+			
+			// Releasing wake lock
+			WakeLocker.release();
+		}
+	};
+	
     public void get_Table(){
     	_table.clear();
     	try{
@@ -788,7 +906,10 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 			try {
 				for(int i = 0; i < params.length; i++)
 					input[i] = params[i];
-				Thread.sleep(3000);
+				if(select == 0)
+					Thread.sleep(1000);
+				else
+					Thread.sleep(3000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -905,6 +1026,39 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	    	mLocationClient.disconnect();
 	    }
     }
+	
+	@Override
+	protected void onDestroy() {
+		if (mRegisterTask != null) {
+			mRegisterTask.cancel(true);
+		}
+		try {
+			unregisterReceiver(mHandleMessageReceiver);
+			final Context context = this;
+			/*mRegisterTask = new AsyncTask<Void, Void, Void>() {
+				@Override
+				protected Void doInBackground(Void... params) {
+					// Register on our server
+					// On server creates a new user
+					ServerUtilities.unregister(context, regId);
+					return null;
+				}
+
+				@Override
+				protected void onPostExecute(Void result) {
+					mRegisterTask = null;
+				}
+
+			};
+			mRegisterTask.execute(null, null, null);*/
+			GCMRegistrar.unregister(this);
+			//GCMRegistrar.onDestroy(this);
+		}catch (Exception e) {
+			Log.e("UnRegister Receiver Error", "> " + e.getMessage());
+		}
+		super.onDestroy();
+	}
+	
     @Override
 	public void onWindowFocusChanged(boolean hasFocus) {
 		// TODO Auto-generated method stub

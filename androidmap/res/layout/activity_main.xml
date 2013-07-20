@@ -84,6 +84,13 @@
         </LinearLayout>
     </HorizontalScrollView>
 
+    <TextView android:id="@+id/lblMessage" 
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content"
+         android:textSize="16dip"
+         android:layout_margin="10dip"
+         android:textColor="#000000"/>
+
     <fragment
         android:id="@+id/map"
         android:layout_width="fill_parent"

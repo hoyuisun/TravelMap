@@ -9,6 +9,8 @@ package edu.yuntech.androidmap;
 
 public final class Manifest {
     public static final class permission {
-        public static final String MAPS_RECEIVE="edu.yuntech.androidmap.permission.MAPS_RECEIVE";
+        /**  Creates a custom permission so only this app can receive its messages. 
+         */
+        public static final String C2D_MESSAGE="edu.yuntech.androidmap.permission.C2D_MESSAGE";
     }
 }
