@@ -64,32 +64,37 @@
                 android:src="@drawable/plan" />
 
             <ImageButton
+                android:id="@+id/roadwork"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/roadwork" />
+
+            <ImageButton
+                android:id="@+id/traffic_jam"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/traffic_jam" />
+
+            <ImageButton
                 android:id="@+id/push"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/push" />
 
             <ImageButton
-                android:id="@+id/imageButton3"
+                android:id="@+id/facebook"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/facebook" />
 
             <ImageButton
-                android:id="@+id/imageButton4"
+                android:id="@+id/information"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/information" />
 
         </LinearLayout>
     </HorizontalScrollView>
-
-    <TextView android:id="@+id/lblMessage" 
-         android:layout_width="fill_parent"
-         android:layout_height="wrap_content"
-         android:textSize="16dip"
-         android:layout_margin="10dip"
-         android:textColor="#000000"/>
 
     <fragment
         android:id="@+id/map"

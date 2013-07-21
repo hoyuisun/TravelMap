@@ -25,7 +25,6 @@ public class GCMIntentService extends GCMBaseIntentService {
     @Override
     protected void onRegistered(Context context, String registrationId) {
         Log.i(TAG, "Device registered: regId = " + registrationId);
-        displayMessage(context, "Your device registred with GCM");
         Log.d("NAME", AndroidMap.name);
         ServerUtilities.register(context, AndroidMap.name, AndroidMap.email, registrationId);
     }
@@ -47,7 +46,8 @@ public class GCMIntentService extends GCMBaseIntentService {
     protected void onMessage(Context context, Intent intent) {
         Log.i(TAG, "Received message");
         String message = intent.getExtras().getString("price");
-        
+        if(message == null)
+        	return ;
         displayMessage(context, message);
         // notifies user
         generateNotification(context, message);
@@ -87,7 +87,7 @@ public class GCMIntentService extends GCMBaseIntentService {
      * Issues a notification to inform the user that server has sent a message.
      */
     private static void generateNotification(Context context, String message) {
-        int icon = R.drawable.ic_launcher;
+        int icon = R.drawable.icon;
         long when = System.currentTimeMillis();
         NotificationManager notificationManager = (NotificationManager)
                 context.getSystemService(Context.NOTIFICATION_SERVICE);

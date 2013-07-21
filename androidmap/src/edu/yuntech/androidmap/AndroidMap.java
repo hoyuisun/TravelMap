@@ -1,6 +1,5 @@
 package edu.yuntech.androidmap;
 
-import static edu.yuntech.androidmap.CommonUtilities.SENDER_ID;
 import static edu.yuntech.androidmap.CommonUtilities.DISPLAY_MESSAGE_ACTION;
 import static edu.yuntech.androidmap.CommonUtilities.EXTRA_MESSAGE;
 import static edu.yuntech.androidmap.CommonUtilities.SENDER_ID;
@@ -42,6 +41,7 @@ import android.os.SystemClock;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -90,7 +90,11 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     private ImageButton weather;
     private ImageButton star;
     private ImageButton plan;
+    private ImageButton roadwork;
+    private ImageButton traffic_jam;
     private ImageButton push;
+    private ImageButton facebook;
+    private ImageButton information;
     private boolean starting = false;
     
     private String index = null;
@@ -112,17 +116,14 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		      .setFastestInterval(16)    // 16ms = 60fps
 		      .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 	
-	// label to display gcm messages
-		TextView lblMessage;
 		
-		// Asyntask
-		AsyncTask<Void, Void, Void> mRegisterTask;
+	// Asyntask
+	AsyncTask<Void, Void, Void> mRegisterTask;
 		
-		// Alert dialog manager
-		AlertDialogManager alert = new AlertDialogManager();
-		
-		// Connection detector
-		ConnectionDetector cd;
+	// Alert dialog manager
+	AlertDialogManager alert = new AlertDialogManager();
+	// Connection detector
+	ConnectionDetector cd;
 		
 	public static String name;
 	public static String email;
@@ -180,7 +181,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 			            try{
-			            	String result = DBConnector.executeQuery("create table " + context.getText().toString() + "(id integer auto_increment primary key,name char(20),site char(50),context char(100),lat decimal(9, 7), lng decimal(10,7));", "http://140.125.45.113/contest/post_mysql/travel.php");
+			            	String result = DBConnector.executeQuery("create table " + context.getText().toString() + "(id integer auto_increment primary key,name varchar(20),site varchar(50),context varchar(100),lat decimal(9, 7), lng decimal(10,7)) CHARACTER SET utf8 COLLATE utf8_general_ci;", "http://140.125.45.113/contest/post_mysql/travel.php");
 			            	index = context.getText().toString();
 			            }catch(Exception e){
 			            	Toast.makeText(getApplicationContext(), "建立失敗", 5).show();
@@ -300,6 +301,26 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         	
         });
         
+        roadwork = (ImageButton)findViewById(R.id.roadwork);
+        roadwork.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				show_Dialog("你確定要回報資訊?", 3);
+			}  	
+        });
+        
+        traffic_jam = (ImageButton)findViewById(R.id.traffic_jam);
+        traffic_jam.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				show_Dialog("你確定要回報資訊?", 4);
+			}  	
+        });
+        
         push = (ImageButton)findViewById(R.id.push);
         push.setOnClickListener(new OnClickListener(){
 
@@ -310,6 +331,31 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 			}
         	
         });
+        
+        information = (ImageButton)findViewById(R.id.information);
+        information.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				AlertDialog.Builder dialog = new AlertDialog.Builder(AndroidMap.this);
+		        dialog.setTitle("About");
+		        dialog.setMessage("Auther: Chun-Yen Lin\n" +
+		        				  "Website: hoyuisun/TravelMap\n" +
+		        				  "Version: v2.0\n" + 
+		        				  "Update: 07/21/2013");
+		        dialog.setPositiveButton("確定",
+		                new DialogInterface.OnClickListener(){
+		                    public void onClick(
+		                            DialogInterface dialoginterface, int i){
+		                            }
+		                    }
+		        		);
+		        dialog.show();
+			}
+        	
+        });
+        
     }
     
 	public void register(){
@@ -336,8 +382,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		// Make sure the manifest was properly set - comment out this line
 		// while developing the app, then uncomment it when it's ready.
 		GCMRegistrar.checkManifest(this);
-
-		lblMessage = (TextView) findViewById(R.id.lblMessage);
 		
 		registerReceiver(mHandleMessageReceiver, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
@@ -396,8 +440,13 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 			 * */
 			
 			// Showing received message
-			lblMessage.append(newMessage + "\n");			
-			Toast.makeText(getApplicationContext(), "New Message: " + newMessage, Toast.LENGTH_LONG).show();
+			if(newMessage == null)
+				return;
+			else if(newMessage.equals("From Server: Successfully added device!"))
+				Toast.makeText(getApplicationContext(), newMessage, Toast.LENGTH_SHORT).show();
+			else
+				show_Dialog(newMessage, 2);
+			//Toast.makeText(getApplicationContext(), newMessage, Toast.LENGTH_LONG).show();
 			
 			// Releasing wake lock
 			WakeLocker.release();
@@ -419,7 +468,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         }
     	//下拉式選單
     	if(_table.size() > table_cnt){
-    		table_cnt = _table.size();
 	    	listAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, _table);
 	        spin.setAdapter(listAdapter);
 	        spin.setSelection(_table.indexOf(index));
@@ -427,6 +475,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	            @Override
 	            public void onItemSelected(AdapterView<?> arg0, View arg1,final int position, long arg3) {
 	            	select = 0;
+	        		table_cnt = _table.size();
 	            	new asyncTaskProgress().execute(_table.get(position));
 	            	/*final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, null, "正在載入...", true);
 	                new Thread(){
@@ -512,7 +561,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
                 stay.lng = jsonData.getString("lng");
                 map.addMarker(new MarkerOptions()
 	            .position(new LatLng(Double.valueOf(stay.lat), Double.valueOf(stay.lng)))
-	            .draggable(true)
 	            .snippet("連絡電話: " + stay.phone + "\n傳真: " + stay.fax + "\n網址: " + stay.website + "\nEMAIL: " + stay.email + "\n中文地址: " + stay.site_tw + "\n英文地址: " + stay.site_en)
 	            .title(stay.name_tw));
                 _data.add(stay);
@@ -545,7 +593,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
             	hospital.lng = jsonData.getString("lng");
                 map.addMarker(new MarkerOptions()
 	            .position(new LatLng(Double.valueOf(hospital.lat), Double.valueOf(hospital.lng)))
-	            .draggable(true)
 	            .snippet("連絡電話: " + hospital.phone + "\n中文地址: " + hospital.site_tw)
 	            .title(hospital.name_tw));
                 _data.add(hospital);
@@ -612,7 +659,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
             	restaurant.lng = jsonData.getString("lng");
                 map.addMarker(new MarkerOptions()
 	            .position(new LatLng(Double.valueOf(restaurant.lat), Double.valueOf(restaurant.lng)))
-	            .draggable(true)
 	            .snippet("連絡電話: " + restaurant.phone + "\n負責人: " + restaurant.people + "\n中文地址: " + restaurant.site_tw)
 	            .icon(BitmapDescriptorFactory.defaultMarker(210))
 	            .title(restaurant.name_tw));
@@ -646,7 +692,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
             	stop.lng = jsonData.getString("lng");
                 map.addMarker(new MarkerOptions()
 	            .position(new LatLng(Double.valueOf(stop.lat), Double.valueOf(stop.lng)))
-	            .draggable(true)
 	            .snippet("\n位置: " + stop.site_tw + "\n情形: " + stop.context)
 	            .icon(BitmapDescriptorFactory.defaultMarker(210))
 	            .title(stop.name_tw));
@@ -755,6 +800,8 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	public void Modify(String name){
     	Intent intent = new Intent();
     	Bundle bundle = new Bundle();
+    	if (name.equals("道路施工") || name.equals("交通堵塞"))
+        	return ;
 		String data_id = hash.get(name).toString();
 		if(index.equals("景點")){
 			intent.setClass(AndroidMap.this, Modify_view.class);
@@ -875,19 +922,22 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     public class asyncTaskProgress extends AsyncTask<String, Void, Void>{
     	
     	String input[] = new String[2];
+    	String message;
     	ProgressDialog PDialog;
     	
 		@Override
 		protected void onPostExecute(Void result) {
 			// TODO Auto-generated method stub
 			super.onPostExecute(result);
-			if(select == 0)
+			if(select == 0){
 				get_Data(input[0]);
-			else{
+				message = "\"" + index + "\"" + " 資訊已載入至地圖";
+			} else{
 				GetDirection(new LatLng(Double.valueOf(input[0]), Double.valueOf(input[1])));
+				message = "路徑規劃執行已完成";
 			}
 			PDialog.dismiss();
-			show_Dialog(select);
+			show_Dialog(message, select);
 		}
 
 		@Override
@@ -947,18 +997,19 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         }
 
         private void render(Marker marker, View view) {
-            int badge=R.drawable.badge_qld;
+            int badge = 0;
             // Use the equals() method on a Marker to check for equals.  Do not use ==.
             //if (marker.equals(mBrisbane)) {
-            
-            if(index.equals("景點")){
+            if(marker.getTitle().equals("道路施工") || marker.getTitle().equals("交通堵塞")){
+            	
+            }else if(index.equals("景點")){
             	badge = R.drawable.landscape;
             	
             }else if(index.equals("民宿")){
-            	
+            	badge = R.drawable.homestay;
             	
             }else if(index.equals("餐廳")){
-            	
+            	badge = R.drawable.restaurant;
             	
             }else if(index.equals("醫院")){
             	badge = R.drawable.hospital;
@@ -996,7 +1047,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
             //marker內容設定
             String snippet = marker.getSnippet();
             TextView snippetUi = ((TextView) view.findViewById(R.id.snippet));
-            if (snippet != null && snippet.length() > 12) {
+            if (snippet != null) {
                 SpannableString snippetText = new SpannableString(snippet);
                 //snippetText.setSpan(new ForegroundColorSpan(Color.MAGENTA), 0, 10, 0);
                 snippetText.setSpan(new ForegroundColorSpan(Color.BLUE), 0, snippet.length(), 0);
@@ -1008,14 +1059,25 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     }
     
     @Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		// TODO Auto-generated method stub
+    	if(keyCode == KeyEvent.KEYCODE_BACK){
+    		show_Dialog(null, 5);
+    	}
+		return super.onKeyDown(keyCode, event);
+	}
+
+	@Override
     protected void onResume() {
         super.onResume();
         setUpMapIfNeeded();
         setUpLocationClientIfNeeded();
         mLocationClient.connect();
         if(starting == true){
-	        get_Table();
-	        get_Data(index);
+	        if(_table.size() > table_cnt)
+	        	get_Table();
+	        else
+	        	get_Data(index);
         }
     }
 
@@ -1049,21 +1111,81 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     	if(starting == true)
     		get_Table();
 	}
-    private void show_Dialog(int flag){
+    private void show_Dialog(String message, int flag){
     	Builder dialog = new AlertDialog.Builder(AndroidMap.this);
         
     	if(flag == 0){
     		dialog.setTitle("資料")
-            .setMessage("\"" + index + "\"" + " 資訊已載入至地圖")
+            .setMessage(message)
             .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                 }
             });
-    	}else{
+    	}else if(flag == 1){
     		dialog.setTitle("規劃")
-            .setMessage("路徑規劃執行已完成")
+            .setMessage(message)
             .setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+    	}else if(flag == 2){
+    		dialog.setTitle("即時訊息")
+    		.setMessage(message)
+    		.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+    	}else if(flag == 3){
+    		dialog.setTitle("TAG")
+    		.setMessage(message)
+    		.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                	map.addMarker(new MarkerOptions()
+	 	               .position(new LatLng(mLocationClient.getLastLocation().getLatitude(), mLocationClient.getLastLocation().getLongitude()))
+	 	               .icon(BitmapDescriptorFactory.fromResource(R.drawable.roadwork_marker))
+	 	               .snippet("請迴避道路或改道行駛")
+	 	               .title("道路施工")
+                	);
+                }
+            })
+            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+    	}else if(flag == 4){
+    		dialog.setTitle("TAG")
+    		.setMessage(message)
+    		.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                	map.addMarker(new MarkerOptions()
+	 	               .position(new LatLng(mLocationClient.getLastLocation().getLatitude(), mLocationClient.getLastLocation().getLongitude()))
+	 	               .icon(BitmapDescriptorFactory.fromResource(R.drawable.traffic_jam_marker))
+	 	               .snippet("請迴避道路或改道行駛")
+	 	               .title("交通堵塞")
+                	);
+                }
+            })
+            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                }
+            });
+    	}else if(flag == 5){
+    		dialog.setTitle("確定要離開嗎?")
+    		.setMessage(message)
+    		.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                	System.exit(0);
+                }
+            })
+            .setNegativeButton("取消", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                 }
