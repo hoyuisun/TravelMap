@@ -342,7 +342,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		registerReceiver(mHandleMessageReceiver, new IntentFilter(
 				DISPLAY_MESSAGE_ACTION));
 		// Get GCM registration id
-		final String regId = GCMRegistrar.getRegistrationId(this);
+		regId = GCMRegistrar.getRegistrationId(this);
 		
 		if (regId.equals("")) {
 			// Registration is not present, register now with GCM			
@@ -1035,24 +1035,8 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		try {
 			unregisterReceiver(mHandleMessageReceiver);
 			final Context context = this;
-			/*mRegisterTask = new AsyncTask<Void, Void, Void>() {
-				@Override
-				protected Void doInBackground(Void... params) {
-					// Register on our server
-					// On server creates a new user
-					ServerUtilities.unregister(context, regId);
-					return null;
-				}
-
-				@Override
-				protected void onPostExecute(Void result) {
-					mRegisterTask = null;
-				}
-
-			};
-			mRegisterTask.execute(null, null, null);*/
 			GCMRegistrar.unregister(this);
-			//GCMRegistrar.onDestroy(this);
+			GCMRegistrar.onDestroy(this);
 		}catch (Exception e) {
 			Log.e("UnRegister Receiver Error", "> " + e.getMessage());
 		}

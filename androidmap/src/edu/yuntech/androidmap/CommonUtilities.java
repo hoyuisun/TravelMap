@@ -9,12 +9,12 @@ public final class CommonUtilities {
     static final String SERVER_URL = "http://140.125.45.113/gcm_server_php"; 
 
     // Google project id
-    static final String SENDER_ID = "102283855112"; 
+    static final String SENDER_ID = "867944155580"; 
 
     /**
      * Tag used on log messages.
      */
-    static final String TAG = "AndroidHive GCM";
+    static final String TAG = "AndroidMap GCM";
 
     static final String DISPLAY_MESSAGE_ACTION =
             "cedu.yuntech.androidmap.DISPLAY_MESSAGE";

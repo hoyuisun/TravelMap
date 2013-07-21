@@ -84,15 +84,16 @@ public final class ServerUtilities {
      */
     static void unregister(final Context context, final String regId) {
         Log.i(TAG, "unregistering device (regId = " + regId + ")");
-        String serverUrl = SERVER_URL + "/unregister.php";
+        /*String serverUrl = SERVER_URL + "/unregister";
         Map<String, String> params = new HashMap<String, String>();
-        params.put("regId", regId);
+        params.put("regId", regId);*/
         try {
-            post(serverUrl, params);
+        	String result = DBConnector.executeQuery("DELETE FROM gcm_users WHERE gcm_regid = '" + regId + "'", "http://140.125.45.113/gcm_server_php/query_table.php");
+        	//post(serverUrl, params);
             GCMRegistrar.setRegisteredOnServer(context, false);
             String message = context.getString(R.string.server_unregistered);
             CommonUtilities.displayMessage(context, message);
-        } catch (IOException e) {
+        } catch (Exception e) {
             // At this point the device is unregistered from GCM, but still
             // registered in the server.
             // We could try to unregister again, but it is not necessary:
@@ -155,6 +156,7 @@ public final class ServerUtilities {
               throw new IOException("Post failed with error code " + status);
             }
         } catch(Exception e){
+        	//Log.e("URL", "Error");
         }finally {
             if (conn != null) {
                 conn.disconnect();
