@@ -90,6 +90,7 @@
         </receiver>
 
         <service android:name=".GCMIntentService" />
+        <activity android:name="Schedule"></activity>
         
     </application>
 

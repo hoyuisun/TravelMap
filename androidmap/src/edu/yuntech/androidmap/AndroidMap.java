@@ -102,6 +102,10 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     private int table_cnt = 0;
     private int select = 0;
     private List<LatLng> _points = new ArrayList<LatLng>();
+    public static ArrayList<LatLng> _view = new ArrayList<LatLng>();
+    public static HashMap<String, ArrayList<LatLng>> viewhash = new HashMap<String, ArrayList<LatLng>>();
+    public static ArrayList<String> viewStrings= new ArrayList<String>();
+    public static ArrayList<LatLng> _planPoints = new ArrayList<LatLng>();
     private List<Data> _data = new ArrayList<Data>();
     private List<String> _table = new ArrayList<String>();
     private HashMap<String, String> hash = new HashMap<String, String>();
@@ -111,7 +115,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	String lng[] = new String[1000];
 	LatLng center = new LatLng(24.730870310199286, 121.76321268081665);
 	
-	private static final LocationRequest REQUEST = LocationRequest.create()
+	private final LocationRequest REQUEST = LocationRequest.create()
 		      .setInterval(5000)         // 5 seconds
 		      .setFastestInterval(16)    // 16ms = 60fps
 		      .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -127,6 +131,9 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		
 	public static String name;
 	public static String email;
+	public static int view_cnt = 0;
+	public static int plan_cnt = 0;
+	public static boolean view_direction = false;
 	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,7 +144,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
-     
         //setProgressBarIndeterminateVisibility(true);
         /*
          *此段必要!! 
@@ -296,7 +302,9 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 			@Override
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
-				
+				Intent intent = new Intent();
+				intent.setClass(getApplicationContext(), Schedule.class);
+				startActivity(intent);
 			}
         	
         });
@@ -352,7 +360,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		        dialog.setTitle("About");
 		        dialog.setMessage("Auther: Chun-Yen Lin\n" +
 		        				  "Website: hoyuisun/TravelMap\n" +
-		        				  "Version: v2.1\n" + 
+		        				  "Version: v2.2\n" + 
 		        				  "Update: 07/21/2013");
 		        dialog.setPositiveButton("確定",
 		                new DialogInterface.OnClickListener(){
@@ -367,7 +375,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         });
         
     }
-    
+	
 	public void register(){
 		cd = new ConnectionDetector(getApplicationContext());
 
@@ -510,6 +518,12 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     }
     
     public void get_Data(String position){
+    	if(view_direction == true){
+    		select = 1;
+    		int des = _planPoints.size()-1;
+			new asyncTaskProgress().execute(Double.toString(_planPoints.get(des).latitude), Double.toString(_planPoints.get(des).longitude));
+    		return ;
+    	}
     	clear_Data();
         String select = "SELECT * FROM " + position;
         index = position;
@@ -717,20 +731,33 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     //規劃路徑，將點放進List中
     public List<LatLng> GetDirection(LatLng position){
 		String result = null;
-		get_Data(index);
+		if(view_direction == false)
+			get_Data(index);
 		try {
 			LatLng now = new LatLng(mLocationClient.getLastLocation().getLatitude(), mLocationClient.getLastLocation().getLongitude());
 			
 	        String route= "http://map.google.com/maps/api/directions/json?origin=" +
 	           		now.latitude + "," + now.longitude +"&destination=" + position.latitude + "," + position.longitude + "&language=en&sensor=true";
+	        if(view_direction){
+	        	String waypoints = "";
+	        	for(int i = 0; i < _planPoints.size()-1; i++){
+	        		if(i > 0)
+	        			waypoints += "|";
+	        		waypoints += Double.valueOf(_planPoints.get(i).latitude) + "," + Double.valueOf(_planPoints.get(i).longitude);
+	        	}
+	        	route = "http://map.google.com/maps/api/directions/json?origin=" +
+		           		now.latitude + "," + now.longitude +"&destination=" + position.latitude + "," + position.longitude + 
+		           		"&waypoints=" + waypoints + "&language=en&sensor=true";
+	        	view_direction = false;
+	        	get_Data(index);
+	        }
 	       	HttpClient httpClient = new DefaultHttpClient();
 	        HttpPost httpPost = new HttpPost(route);
 	        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
 	        httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
 	        HttpResponse httpResponse = httpClient.execute(httpPost);
 	        HttpEntity httpEntity = httpResponse.getEntity();
-	        InputStream inputStream = httpEntity.getContent();
-	            
+	        InputStream inputStream = httpEntity.getContent(); 
 	        BufferedReader bufReader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"), 8);
 	        StringBuilder builder = new StringBuilder();
 	        String line = null;
@@ -751,7 +778,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	            
 		} catch(Exception e) {
 	             //Log.e("log_tag", e.toString());
-	        	Toast.makeText(AndroidMap.this, "規劃路線失敗，請重新執行!", 5).show();
+	        	Toast.makeText(getApplicationContext(), "規劃路線失敗，請重新執行!", Toast.LENGTH_SHORT).show();
 	    }
 		return _points;
 	}
@@ -1371,7 +1398,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		AlertDialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		
-		String[] items = {"修改資訊", "路線導航"};
+		String[] items = {"修改資訊", "加入行程", "路線導航"};
 		builder.setTitle("要進行動作...");
 		builder.setItems(items, new DialogInterface.OnClickListener() {
 			@Override
@@ -1382,6 +1409,10 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 					Modify(marker.getTitle());
 					break;
 				case 1:
+					_view.add(marker.getPosition());
+					view_cnt++;
+					break;
+				case 2:
 					select = 1;
 					new asyncTaskProgress().execute(Double.toString(marker.getPosition().latitude), Double.toString(marker.getPosition().longitude));
 					/*final ProgressDialog PDialog = ProgressDialog.show(AndroidMap.this, null, "路徑規劃中", true);
@@ -1398,9 +1429,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		                }
 	               }.start();
 					GetDirection(marker.getPosition());*/
-					break;
-				case 2:
-					//
 					break;
 				}
 			}

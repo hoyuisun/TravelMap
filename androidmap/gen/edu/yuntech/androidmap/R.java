@@ -214,15 +214,15 @@ containing a value of this type.
         public static final int email=0x7f05002c;
         public static final int facebook=0x7f050010;
         public static final int fax=0x7f050028;
-        public static final int geo=0x7f050036;
+        public static final int geo=0x7f050037;
         public static final int horizontalScrollView1=0x7f050008;
         public static final int hybrid=0x7f050004;
         public static final int imageButton1=0x7f050006;
         public static final int imageButton2=0x7f050007;
         public static final int information=0x7f050011;
-        public static final int lat=0x7f050034;
-        public static final int listView1=0x7f050039;
-        public static final int lng=0x7f050035;
+        public static final int lat=0x7f050035;
+        public static final int listView1=0x7f050032;
+        public static final int lng=0x7f050036;
         public static final int map=0x7f050012;
         public static final int name=0x7f050019;
         public static final int name_en=0x7f050026;
@@ -245,8 +245,8 @@ containing a value of this type.
         public static final int submit=0x7f05001e;
         public static final int terrain=0x7f050003;
         public static final int textView1=0x7f050018;
-        public static final int textView10=0x7f050037;
-        public static final int textView11=0x7f050038;
+        public static final int textView10=0x7f050038;
+        public static final int textView11=0x7f050039;
         public static final int textView2=0x7f05001a;
         public static final int textView3=0x7f05001c;
         public static final int textView4=0x7f050016;
@@ -260,8 +260,8 @@ containing a value of this type.
         public static final int traffic_jam=0x7f05000e;
         public static final int txtEmail=0x7f050014;
         public static final int txtName=0x7f050013;
-        public static final int txtSnippet=0x7f050033;
-        public static final int txtTitle=0x7f050032;
+        public static final int txtSnippet=0x7f050034;
+        public static final int txtTitle=0x7f050033;
         public static final int user=0x7f050017;
         public static final int weather=0x7f05000a;
         public static final int webView1=0x7f05003a;
@@ -277,13 +277,13 @@ containing a value of this type.
         public static final int add_view=0x7f030006;
         public static final int custom_info_contents=0x7f030007;
         public static final int custom_info_window=0x7f030008;
-        public static final int marker=0x7f030009;
-        public static final int modify_extra=0x7f03000a;
-        public static final int modify_hospital=0x7f03000b;
-        public static final int modify_restaurant=0x7f03000c;
-        public static final int modify_stay=0x7f03000d;
-        public static final int modify_view=0x7f03000e;
-        public static final int traffic=0x7f03000f;
+        public static final int list=0x7f030009;
+        public static final int marker=0x7f03000a;
+        public static final int modify_extra=0x7f03000b;
+        public static final int modify_hospital=0x7f03000c;
+        public static final int modify_restaurant=0x7f03000d;
+        public static final int modify_stay=0x7f03000e;
+        public static final int modify_view=0x7f03000f;
         public static final int web_view=0x7f030010;
     }
     public static final class menu {
