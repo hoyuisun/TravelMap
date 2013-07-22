@@ -332,6 +332,16 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         	
         });
         
+        facebook = (ImageButton)findViewById(R.id.facebook);
+        facebook.setOnClickListener(new OnClickListener(){
+
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+			}
+        	
+        });
+        
         information = (ImageButton)findViewById(R.id.information);
         information.setOnClickListener(new OnClickListener(){
 
@@ -342,7 +352,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		        dialog.setTitle("About");
 		        dialog.setMessage("Auther: Chun-Yen Lin\n" +
 		        				  "Website: hoyuisun/TravelMap\n" +
-		        				  "Version: v2.0\n" + 
+		        				  "Version: v2.1\n" + 
 		        				  "Update: 07/21/2013");
 		        dialog.setPositiveButton("確定",
 		                new DialogInterface.OnClickListener(){
@@ -707,40 +717,43 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     //規劃路徑，將點放進List中
     public List<LatLng> GetDirection(LatLng position){
 		String result = null;
-			try {
-				LatLng now = new LatLng(mLocationClient.getLastLocation().getLatitude(), mLocationClient.getLastLocation().getLongitude());
-				
-	            String route= "http://map.google.com/maps/api/directions/json?origin=" +
-	            		now.latitude + "," + now.longitude +"&destination=" + position.latitude + "," + position.longitude + "&language=en&sensor=true";
-	        	HttpClient httpClient = new DefaultHttpClient();
-	            HttpPost httpPost = new HttpPost(route);
-	            ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
-	            httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
-	            HttpResponse httpResponse = httpClient.execute(httpPost);
-	            HttpEntity httpEntity = httpResponse.getEntity();
-	            InputStream inputStream = httpEntity.getContent();
+		get_Data(index);
+		try {
+			LatLng now = new LatLng(mLocationClient.getLastLocation().getLatitude(), mLocationClient.getLastLocation().getLongitude());
+			
+	        String route= "http://map.google.com/maps/api/directions/json?origin=" +
+	           		now.latitude + "," + now.longitude +"&destination=" + position.latitude + "," + position.longitude + "&language=en&sensor=true";
+	       	HttpClient httpClient = new DefaultHttpClient();
+	        HttpPost httpPost = new HttpPost(route);
+	        ArrayList<NameValuePair> params = new ArrayList<NameValuePair>();
+	        httpPost.setEntity(new UrlEncodedFormEntity(params, HTTP.UTF_8));
+	        HttpResponse httpResponse = httpClient.execute(httpPost);
+	        HttpEntity httpEntity = httpResponse.getEntity();
+	        InputStream inputStream = httpEntity.getContent();
 	            
-	            BufferedReader bufReader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"), 8);
-	            StringBuilder builder = new StringBuilder();
-	            String line = null;
-	            while((line = bufReader.readLine()) != null) {
-	                builder.append(line + "\n");
-	            }
-	            inputStream.close();
-	            result = builder.toString();
-	            JSONObject jsonObject = new JSONObject(result);
-	            JSONArray routeObject = jsonObject.getJSONArray("routes");
-                String polyline = routeObject.getJSONObject(0).getJSONObject("overview_polyline").getString("points");
+	        BufferedReader bufReader = new BufferedReader(new InputStreamReader(inputStream, "utf-8"), 8);
+	        StringBuilder builder = new StringBuilder();
+	        String line = null;
+	        
+	        while((line = bufReader.readLine()) != null) {
+	        	builder.append(line + "\n");
+	        }
+	        
+	        inputStream.close();
+	        result = builder.toString();
+	        JSONObject jsonObject = new JSONObject(result);
+	        JSONArray routeObject = jsonObject.getJSONArray("routes");
+            String polyline = routeObject.getJSONObject(0).getJSONObject("overview_polyline").getString("points");
 
-                if (polyline.length() > 0){
-                	decodePolylines(polyline);
-                }
+            if (polyline.length() > 0){
+                decodePolylines(polyline);
+            }
 	            
-	        } catch(Exception e) {
+		} catch(Exception e) {
 	             //Log.e("log_tag", e.toString());
 	        	Toast.makeText(AndroidMap.this, "規劃路線失敗，請重新執行!", 5).show();
-	        }
-			return _points;
+	    }
+		return _points;
 	}
     
     /*
@@ -970,6 +983,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     
     private void clear_Data(){
     	map.clear();
+    	_points.clear();
     	hash.clear();
     	_data.clear();
     }
@@ -1000,7 +1014,11 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
             int badge = 0;
             // Use the equals() method on a Marker to check for equals.  Do not use ==.
             //if (marker.equals(mBrisbane)) {
-            if(marker.getTitle().equals("道路施工") || marker.getTitle().equals("交通堵塞")){
+            if(marker.getTitle().equals("道路施工")){
+            	badge = R.drawable.roadwork_marker_icon;
+            	
+            }else if(marker.getTitle().equals("交通堵塞")){
+            	badge = R.drawable.traffic_jam_markericon;
             	
             }else if(index.equals("景點")){
             	badge = R.drawable.landscape;
@@ -1059,6 +1077,22 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     }
     
     @Override
+	public void finish() {
+		// TODO Auto-generated method stub
+		super.finish();
+		if (mRegisterTask != null) {
+			mRegisterTask.cancel(true);
+		}
+		try {
+			unregisterReceiver(mHandleMessageReceiver);
+			GCMRegistrar.unregister(this);
+			GCMRegistrar.onDestroy(this);
+		}catch (Exception e) {
+			Log.e("UnRegister Receiver Error", "> " + e.getMessage());
+		}
+	}
+
+	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
 		// TODO Auto-generated method stub
     	if(keyCode == KeyEvent.KEYCODE_BACK){
@@ -1182,7 +1216,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     		.setPositiveButton("確定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                	System.exit(0);
+                	finish();
                 }
             })
             .setNegativeButton("取消", new DialogInterface.OnClickListener() {

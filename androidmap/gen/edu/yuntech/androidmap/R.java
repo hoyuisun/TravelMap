@@ -187,7 +187,7 @@ containing a value of this type.
         public static final int hospital=0x7f02001d;
         public static final int ic_launcher=0x7f02001e;
         public static final int icon=0x7f02001f;
-        public static final int information=0x7f020020;
+        public static final int info=0x7f020020;
         public static final int landscape=0x7f020021;
         public static final int location_icon=0x7f020022;
         public static final int nearby=0x7f020023;
@@ -196,12 +196,14 @@ containing a value of this type.
         public static final int restaurant=0x7f020026;
         public static final int roadwork=0x7f020027;
         public static final int roadwork_marker=0x7f020028;
-        public static final int star=0x7f020029;
-        public static final int success=0x7f02002a;
-        public static final int traffic_jam=0x7f02002b;
-        public static final int traffic_jam_marker=0x7f02002c;
-        public static final int train=0x7f02002d;
-        public static final int weather=0x7f02002e;
+        public static final int roadwork_marker_icon=0x7f020029;
+        public static final int star=0x7f02002a;
+        public static final int success=0x7f02002b;
+        public static final int traffic_jam=0x7f02002c;
+        public static final int traffic_jam_marker=0x7f02002d;
+        public static final int traffic_jam_markericon=0x7f02002e;
+        public static final int train=0x7f02002f;
+        public static final int weather=0x7f020030;
     }
     public static final class id {
         public static final int action_settings=0x7f05003b;
