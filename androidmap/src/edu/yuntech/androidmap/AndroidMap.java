@@ -346,6 +346,9 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 			@Override
 			public void onClick(View arg0) {
 				// TODO Auto-generated method stub
+				Intent intent = new Intent();
+				intent.setClass(AndroidMap.this, Facebook.class);
+				startActivity(intent);
 			}
         	
         });
@@ -360,7 +363,7 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		        dialog.setTitle("About");
 		        dialog.setMessage("Auther: Chun-Yen Lin\n" +
 		        				  "Website: hoyuisun/TravelMap\n" +
-		        				  "Version: v2.3\n" + 
+		        				  "Version: v2.4\n" + 
 		        				  "Update: 07/23/2013");
 		        dialog.setPositiveButton("½T©w",
 		                new DialogInterface.OnClickListener(){
