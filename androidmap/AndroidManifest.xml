@@ -50,7 +50,7 @@
         android:label="@string/app_name"
         android:theme="@android:style/Theme.Light" >
         <activity
-            android:name="edu.yuntech.androidmap.AndroidMap"
+            android:name="edu.yuntech.androidmap.Intro"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -91,6 +91,7 @@
 
         <service android:name=".GCMIntentService" />
         <activity android:name="Schedule"></activity>
+        <activity android:name="AndroidMap"></activity>
         
     </application>
 

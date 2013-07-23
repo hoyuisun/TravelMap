@@ -360,8 +360,8 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		        dialog.setTitle("About");
 		        dialog.setMessage("Auther: Chun-Yen Lin\n" +
 		        				  "Website: hoyuisun/TravelMap\n" +
-		        				  "Version: v2.2\n" + 
-		        				  "Update: 07/21/2013");
+		        				  "Version: v2.3\n" + 
+		        				  "Update: 07/23/2013");
 		        dialog.setPositiveButton("½T©w",
 		                new DialogInterface.OnClickListener(){
 		                    public void onClick(
