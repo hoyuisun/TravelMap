@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,13 +32,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
@@ -57,6 +61,18 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.FacebookException;
+import com.facebook.FacebookOperationCanceledException;
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.LoginButton;
+import com.facebook.widget.ProfilePictureView;
+import com.facebook.widget.WebDialog;
+import com.facebook.widget.WebDialog.OnCompleteListener;
 import com.google.android.gcm.GCMRegistrar;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient.ConnectionCallbacks;
@@ -93,7 +109,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     private ImageButton roadwork;
     private ImageButton traffic_jam;
     private ImageButton push;
-    private ImageButton facebook;
     private ImageButton information;
     private boolean starting = false;
     
@@ -135,6 +150,12 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	public static int plan_cnt = 0;
 	public static boolean view_direction = false;
 	
+	private UiLifecycleHelper uiHelper;
+	private ProfilePictureView profile;
+	private GraphUser user;
+	private ImageButton publish;
+	private ImageButton picture;
+	
 	@Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -160,6 +181,39 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         .penaltyLog()  
         .penaltyDeath()  
         .build()); 
+        
+        // start Facebook Login
+        uiHelper = new UiLifecycleHelper(AndroidMap.this, callback);
+	    uiHelper.onCreate(savedInstanceState);
+	    LoginButton login = (LoginButton)findViewById(R.id.login);
+	    /*
+	     * 不能同時要兩個權限, 只能要一種
+	     * 若要要求另一權限, 需重新執行新的session
+	     * */
+	    //login.setReadPermissions(Arrays.asList("user_likes", "user_status"));
+	    login.setPublishPermissions(Arrays.asList("publish_actions"));
+	    login.setUserInfoChangedCallback(new LoginButton.UserInfoChangedCallback() {
+            @Override
+            public void onUserInfoFetched(GraphUser user) {
+                AndroidMap.this.user = user;
+                updateUI();
+            }
+        });
+	    profile = (ProfilePictureView) findViewById(R.id.profile);
+	    publish = (ImageButton)findViewById(R.id.publish);
+	    publish.setOnClickListener(new View.OnClickListener() {
+	        @Override
+	        public void onClick(View v) {
+	            publishFeedDialog();
+	        }
+	    });
+	    picture = (ImageButton)findViewById(R.id.picture);
+	    picture.setOnClickListener(new View.OnClickListener() {
+	        @Override
+	        public void onClick(View v) {
+	        	performPublish();
+	        }
+	    });
         
         /*
          * android map地圖設定，與中心點之設定
@@ -340,19 +394,6 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
         	
         });
         
-        facebook = (ImageButton)findViewById(R.id.facebook);
-        facebook.setOnClickListener(new OnClickListener(){
-
-			@Override
-			public void onClick(View arg0) {
-				// TODO Auto-generated method stub
-				Intent intent = new Intent();
-				intent.setClass(AndroidMap.this, Facebook.class);
-				startActivity(intent);
-			}
-        	
-        });
-        
         information = (ImageButton)findViewById(R.id.information);
         information.setOnClickListener(new OnClickListener(){
 
@@ -363,8 +404,8 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		        dialog.setTitle("About");
 		        dialog.setMessage("Auther: Chun-Yen Lin\n" +
 		        				  "Website: hoyuisun/TravelMap\n" +
-		        				  "Version: v2.4\n" + 
-		        				  "Update: 07/23/2013");
+		        				  "Version: v2.5\n" + 
+		        				  "Update: 07/24/2013");
 		        dialog.setPositiveButton("確定",
 		                new DialogInterface.OnClickListener(){
 		                    public void onClick(
@@ -1143,7 +1184,40 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	        else
 	        	get_Data(index);
         }
+        Session session = Session.getActiveSession();
+	    if (session != null &&
+	           (session.isOpened() || session.isClosed()) ) {
+	        onSessionStateChange(session, session.getState(), null);
+	    }
+	    uiHelper.onResume();
     }
+
+	@Override
+	  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+	      super.onActivityResult(requestCode, resultCode, data);
+	      uiHelper.onActivityResult(requestCode, resultCode, data);
+	      if (resultCode == RESULT_OK){
+	            // 取得檔案的 Uri
+	    	  Uri image_uri = data.getData();
+	    	  if(image_uri != null){
+		            Bitmap image;
+					try {
+						image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), image_uri);
+						//image = BitmapFactory.decodeResource(this.getResources(), R.drawable.icon);
+						Request request = Request.newUploadPhotoRequest(Session.getActiveSession(), image, new Request.Callback() {
+			                @Override
+			                public void onCompleted(Response response) {
+			                }
+			            });
+			            request.executeAsync();
+			            Toast.makeText(getApplicationContext(), "Upload Successful", Toast.LENGTH_SHORT).show();
+					}catch (Exception e) {
+						// TODO Auto-generated catch block
+						Toast.makeText(getApplicationContext(), "Upload Failed", Toast.LENGTH_SHORT).show();
+					}
+	  		  	}
+	      }
+	}
 
 	@Override
     public void onPause() {
@@ -1151,10 +1225,12 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 	    if (mLocationClient != null) {
 	    	mLocationClient.disconnect();
 	    }
+	    uiHelper.onPause();
     }
 	
 	@Override
 	protected void onDestroy() {
+		super.onDestroy();
 		if (mRegisterTask != null) {
 			mRegisterTask.cancel(true);
 		}
@@ -1166,8 +1242,15 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
 		}catch (Exception e) {
 			Log.e("UnRegister Receiver Error", "> " + e.getMessage());
 		}
-		super.onDestroy();
+		uiHelper.onDestroy();
 	}
+	
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+	    super.onSaveInstanceState(outState);
+	    uiHelper.onSaveInstanceState(outState);
+	}
+	
 	
     @Override
 	public void onWindowFocusChanged(boolean hasFocus) {
@@ -1257,6 +1340,106 @@ public class AndroidMap extends Activity implements OnMapClickListener, OnInfoWi
     	}
     	dialog.show();
     }
+    
+    private void publishFeedDialog() {
+	    Bundle params = new Bundle();
+	    params.putString("name", "Open Travel Map");
+
+	    WebDialog feedDialog = (
+	        new WebDialog.FeedDialogBuilder(AndroidMap.this,
+	            Session.getActiveSession(),
+	            params))
+	        .setOnCompleteListener(new OnCompleteListener() {
+
+	            @Override
+	            public void onComplete(Bundle values,
+	                FacebookException error) {
+	                if (error == null) {
+	                    // When the story is posted, echo the success
+	                    // and the post Id.
+	                    final String postId = values.getString("post_id");
+	                    if (postId != null) {
+	                        Toast.makeText(getApplicationContext(),
+	                            //"Posted story, id: "+postId,
+	                        	"Publish Successful",
+	                            Toast.LENGTH_SHORT).show();
+	                    } else {
+	                        // User clicked the Cancel button
+	                        Toast.makeText(getApplicationContext().getApplicationContext(), 
+	                            "Publish cancelled", 
+	                            Toast.LENGTH_SHORT).show();
+	                    }
+	                } else if (error instanceof FacebookOperationCanceledException) {
+	                    // User clicked the "x" button
+	                    Toast.makeText(getApplicationContext(), 
+	                        "Publish cancelled", 
+	                        Toast.LENGTH_SHORT).show();
+	                } else {
+	                    // Generic, ex: network error
+	                    Toast.makeText(getApplicationContext(), 
+	                        "Error posting story", 
+	                        Toast.LENGTH_SHORT).show();
+	                }
+	            }
+
+	        })
+	        .build();
+	    feedDialog.show();
+	}
+    
+    private void updateUI() {
+        Session session = Session.getActiveSession();
+        boolean enableButtons = (session != null && session.isOpened());
+
+        publish.setEnabled(enableButtons);
+        picture.setEnabled(enableButtons);
+
+        if (enableButtons && user != null) {
+            profile.setProfileId(user.getId());
+            Toast.makeText(getApplicationContext(), "Login as: " + user.getName(), Toast.LENGTH_SHORT).show();
+        } else {
+            profile.setProfileId(null);
+        }
+    }
+    
+    private Session.StatusCallback callback = new Session.StatusCallback() {
+	    @Override
+	    public void call(Session session, SessionState state, Exception exception) {
+	        onSessionStateChange(session, state, exception);
+	    }
+	};
+	
+	private void onSessionStateChange(Session session, SessionState state, Exception exception) {
+	}
+	
+	private boolean hasPublishPermission() {
+        Session session = Session.getActiveSession();
+        return session != null && session.getPermissions().contains("publish_actions");
+    }
+
+    private void performPublish() {
+        Session session = Session.getActiveSession();
+        if (session != null) {
+            if (hasPublishPermission()) {
+                // We can do the action right away.
+            	postPhoto();
+            } else {
+                // We need to get new permissions, then complete the action when we get called back.
+                //session.requestNewPublishPermissions(new Session.NewPermissionsRequest(this, PERMISSIONS));
+            }
+        }
+    }
+    
+    private void postPhoto() {
+    	Intent intent = new Intent(Intent.ACTION_PICK);
+        // 過濾檔案格式
+        intent.setType("image/*");
+        // 建立 "檔案選擇器" 的 Intent  (第二個參數: 選擇器的標題)
+        //Intent destIntent = Intent.createChooser(intent, "選擇檔案");
+        // 切換到檔案選擇器 (它的處理結果, 會觸發 onActivityResult 事件)
+        startActivityForResult(intent, 1);
+    }
+    
 	private void setUpMapIfNeeded() {
         if (map == null) {
             map = ((MapFragment) getFragmentManager().findFragmentById(R.id.map))

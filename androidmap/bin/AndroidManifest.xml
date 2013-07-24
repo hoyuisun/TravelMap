@@ -61,7 +61,7 @@
         
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyAU3uH4eoZLH2Cl-V-3Y2mivhmFVARVzfM" />
+            android:value="AIzaSyCZ57eokuQBJ6gbJptuQ9x0OWnXnbbWfOU" />
         <activity android:name="Add_hospital"></activity>
         <activity android:name="Add_restaurant"></activity>
         <activity android:name="Add_stay"></activity>
@@ -95,6 +95,7 @@
         <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/app_id"/>
         <activity android:name="com.facebook.LoginActivity"></activity>
         <activity android:name="Facebook"></activity>
+        <activity android:name="MainFragment"></activity>
         
     </application>
 
