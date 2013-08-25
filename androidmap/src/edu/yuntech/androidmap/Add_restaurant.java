@@ -16,10 +16,12 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
+import android.view.View.OnTouchListener;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 public class Add_restaurant extends Activity{
@@ -50,7 +52,7 @@ public class Add_restaurant extends Activity{
 	private EditText people;
 	private EditText site;
 	private EditText phone;
-	private Button submit;
+	private ImageButton submit;
 	
 	protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,7 +63,8 @@ public class Add_restaurant extends Activity{
         people = (EditText)findViewById(R.id.people);
         site = (EditText)findViewById(R.id.site);
         phone = (EditText)findViewById(R.id.phone);
-        submit = (Button)findViewById(R.id.submit);
+        submit = (ImageButton)findViewById(R.id.submit);
+        submit.setBackgroundDrawable(null);
         submit.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -72,6 +75,19 @@ public class Add_restaurant extends Activity{
 				t.start();
 				finish();
 			}
+        });
+        submit.setOnTouchListener(new OnTouchListener(){
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				// TODO Auto-generated method stub
+				if (event.getAction() == MotionEvent.ACTION_DOWN)  //按下的時候改變背景及顏色
+					submit.setImageResource(R.drawable.submit_down);
+				else
+					submit.setImageResource(R.drawable.submit);
+				return false;
+			}
+        	
         });
 	}
 	

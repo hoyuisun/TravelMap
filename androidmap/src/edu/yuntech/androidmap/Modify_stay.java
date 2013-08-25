@@ -17,8 +17,10 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -31,6 +33,8 @@ import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.model.LatLng;
+
+import edu.yuntech.androidmap.Modify_view.sendPostRunnable;
 
 public class Modify_stay extends Activity implements ConnectionCallbacks, OnConnectionFailedListener, LocationListener{
 	
@@ -66,7 +70,7 @@ public class Modify_stay extends Activity implements ConnectionCallbacks, OnConn
 	private EditText email;
 	private EditText lat;
 	private EditText lng;
-	private Button submit;
+	private ImageButton submit;
 	private ImageButton geo;
 	
 	private Bundle data;
@@ -91,7 +95,7 @@ public class Modify_stay extends Activity implements ConnectionCallbacks, OnConn
     	lat = (EditText)findViewById(R.id.lat);
     	lng = (EditText)findViewById(R.id.lng);;
     	geo = (ImageButton)findViewById(R.id.geo);
-    	geo.setBackground(null);
+    	geo.setBackgroundDrawable(null);
     	geo.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -104,7 +108,8 @@ public class Modify_stay extends Activity implements ConnectionCallbacks, OnConn
     		
     	});
     	
-        submit = (Button)findViewById(R.id.submit);
+        submit = (ImageButton)findViewById(R.id.submit);
+        submit.setBackgroundDrawable(null);
         submit.setOnClickListener(new OnClickListener(){
 
 			@Override
@@ -116,6 +121,19 @@ public class Modify_stay extends Activity implements ConnectionCallbacks, OnConn
 				t.start();
 				finish();
 			}
+        });
+        submit.setOnTouchListener(new OnTouchListener(){
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				// TODO Auto-generated method stub
+				if (event.getAction() == MotionEvent.ACTION_DOWN)  //按下的時候改變背景及顏色
+					submit.setImageResource(R.drawable.submit_down);
+				else
+					submit.setImageResource(R.drawable.submit);
+				return false;
+			}
+        	
         });
         set_Data();
 	}

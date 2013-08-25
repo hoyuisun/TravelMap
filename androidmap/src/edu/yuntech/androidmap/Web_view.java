@@ -15,7 +15,7 @@ public class Web_view extends Activity {
         String myURL2 = "http://twtraffic.tra.gov.tw/twrail/mobile/home.aspx";
         String myURL3 = "http://www.thsrc.com.tw/thsrcPDA/";
         String myURL4 = "http://www.cwb.gov.tw/pda/";
-        String myURL5 = "http://taiwan.net.tw/pda/m1.aspx?sNo=0001042&keyString=^10002^^";
+        String myURL5 = "http://www.necoast-nsa.gov.tw/mobile/scenicSpotList1.aspx";
         Bundle data = this.getIntent().getExtras();
         
         WebView myBrowser=(WebView)findViewById(R.id.webView1); 
