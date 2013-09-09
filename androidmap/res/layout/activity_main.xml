@@ -87,7 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/push" />
-
+			
             <ImageButton
                 android:id="@+id/information"
                 android:layout_width="wrap_content"

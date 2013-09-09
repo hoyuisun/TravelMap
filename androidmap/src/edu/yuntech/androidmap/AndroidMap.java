@@ -169,6 +169,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
+        setRequestedOrientation(5);
         //setProgressBarIndeterminateVisibility(true);
         /*
          *此段必要!! 
@@ -231,10 +232,10 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
         
         spin = (Spinner)findViewById(R.id.spinner1);
         
-        wifi = new ConnectionDetector(getApplicationContext());
+        /*wifi = new ConnectionDetector(getApplicationContext());
         if(!wifi.isConnectingToInternet())
         	read_Table();
-        else
+        else*/
         	get_Table();
         
         add = (ImageButton)findViewById(R.id.imageButton1);
@@ -389,6 +390,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 			public void onClick(View v) {
 				// TODO Auto-generated method stub
 				select = 1;
+				offline_Table();
 				new asyncTaskProgress().execute();
 			}
         	
@@ -435,8 +437,8 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 		        dialog.setTitle("About");
 		        dialog.setMessage("Auther: Chun-Yen Lin\n" +
 		        				  "Website: hoyuisun/TravelMap\n" +
-		        				  "Version: v2.6\n" + 
-		        				  "Update: 08/25/2013");
+		        				  "Version: v2.7\n" + 
+		        				  "Update: 09/04/2013");
 		        dialog.setPositiveButton("確定",
 		                new DialogInterface.OnClickListener(){
 		                    public void onClick(
@@ -564,26 +566,13 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 	
     public void get_Table(){
     	_table.clear();
-    	File vSDCard = null;
-    	FileWriter vFile = null;
-    	try{
-    		// 取得 SD Card 位置
-            vSDCard = Environment.getExternalStorageDirectory();
-            // 判斷目錄是否存在
-            File vPath = new File( vSDCard.getParent() + "/" + vSDCard.getName() + "/TravelMap");
-            if(!vPath.exists())
-            	vPath.mkdirs();
-            // 寫入檔案
-            vFile = new FileWriter( vSDCard.getParent() + "/" + vSDCard.getName() + "/TravelMap/table.json" );
-    	} catch(Exception e){}
     	try{
         	String result = DBConnector.executeQuery("show tables;", "http://140.125.45.113/contest/post_mysql/query_table.php");
-        	vFile.write(result);
         	JSONArray jsonArray = new JSONArray(result);
+    		
         	for(int i = 0; i < jsonArray.length(); i++){
         		_table.add(jsonArray.getJSONObject(i).getString("Tables_in_location").toString());
         	}
-        	vFile.close();
         	//starting = true;
         }catch(Exception e){
         	Toast.makeText(AndroidMap.this, "尚未有地圖資訊", Toast.LENGTH_SHORT).show();
@@ -675,7 +664,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
         }
     }
     
-  //抓取回報資料庫資料
+    //抓取回報資料庫資料
     public void getInfo(){
     	try {
             String result = DBConnector.executeQuery("SELECT * FROM disaster", "http://140.125.45.113/contest/disaster.php");
@@ -789,6 +778,33 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 	            }
 	        });
     	}
+    }
+    public void offline_Table(){
+    	_table.clear();
+    	File vSDCard = null;
+    	FileWriter vFile = null;
+    	try{
+    		// 取得 SD Card 位置
+            vSDCard = Environment.getExternalStorageDirectory();
+            // 判斷目錄是否存在
+            File vPath = new File( vSDCard.getParent() + "/" + vSDCard.getName() + "/TravelMap");
+            if(!vPath.exists())
+            	vPath.mkdirs();
+            // 寫入檔案
+            vFile = new FileWriter( vSDCard.getParent() + "/" + vSDCard.getName() + "/TravelMap/table.json" );
+    	} catch(Exception e){}
+    	try{
+        	String result = DBConnector.executeQuery("show tables;", "http://140.125.45.113/contest/post_mysql/query_table.php");
+        	vFile.write(result);
+        	JSONArray jsonArray = new JSONArray(result);
+        	for(int i = 0; i < jsonArray.length(); i++){
+        		_table.add(jsonArray.getJSONObject(i).getString("Tables_in_location").toString());
+        	}
+        	vFile.close();
+        	//starting = true;
+        }catch(Exception e){
+        	Toast.makeText(AndroidMap.this, "尚未有地圖資訊", Toast.LENGTH_SHORT).show();
+        }
     }
     public void offline_View(String path){
     	File vSDCard = null;
@@ -1215,8 +1231,8 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
     	for(int i = 1; i < _points.size(); i++){
     		line = map.addPolyline(new PolylineOptions()
             .add(_points.get(i-1), _points.get(i))
-            .width(7)
-            .color(Color.GREEN));
+            .width(8)
+            .color(Color.RED));
     	}
     }
     
@@ -1609,7 +1625,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
                 }
             });
     	}else if(flag == 3){
-    		dialog.setTitle("TAG")
+    		dialog.setTitle("資訊回報")
     		.setMessage(message)
     		.setPositiveButton("確定", new DialogInterface.OnClickListener() {
                 @Override
@@ -1630,7 +1646,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
                 }
             });
     	}else if(flag == 4){
-    		dialog.setTitle("TAG")
+    		dialog.setTitle("資訊回報")
     		.setMessage(message)
     		.setPositiveButton("確定", new DialogInterface.OnClickListener() {
                 @Override
@@ -1915,7 +1931,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 		AlertDialog dialog = null;
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		
-		String[] items = {"修改資訊", "加入行程", "路線導航"};
+		String[] items = {"修改資訊", "加入行程", "路線導航", "惡意回報"};
 		builder.setTitle("要進行動作...");
 		builder.setItems(items, new DialogInterface.OnClickListener() {
 			@Override
@@ -1934,6 +1950,15 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 					select = 2;
 					new asyncTaskProgress().execute(Double.toString(marker.getPosition().latitude), Double.toString(marker.getPosition().longitude));
 					break;
+				case 3:
+					Intent emailIntent = new Intent(Intent.ACTION_SEND);
+			        emailIntent.setData(Uri.parse("mailto:"));
+			        String [] to = new String []{"u9917010@yuntech.edu.tw"};
+			        emailIntent.putExtra(Intent.EXTRA_EMAIL, to);
+			        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "惡意回報");
+			        emailIntent.putExtra(Intent.EXTRA_TEXT, "類別: " + marker.getTitle() + "\n內容: " + marker.getSnippet());
+			        emailIntent.setType("message/rfc822");
+			        startActivity(Intent.createChooser(emailIntent, "Email"));
 				}
 			}
 		});
