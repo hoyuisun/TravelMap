@@ -1,0 +1,9 @@
+C:\Users\eos\Desktop\Notify\Notify\bin\Debug\Notify.exe
+C:\Users\eos\Desktop\Notify\Notify\bin\Debug\Notify.pdb
+C:\Users\eos\Desktop\Notify\Notify\obj\x86\Debug\ResolveAssemblyReference.cache
+C:\Users\eos\Desktop\Notify\Notify\obj\x86\Debug\WindowsFormsApplication2.Form1.resources
+C:\Users\eos\Desktop\Notify\Notify\obj\x86\Debug\WindowsFormsApplication2.Properties.Resources.resources
+C:\Users\eos\Desktop\Notify\Notify\obj\x86\Debug\GenerateResource.read.1.tlog
+C:\Users\eos\Desktop\Notify\Notify\obj\x86\Debug\GenerateResource.write.1.tlog
+C:\Users\eos\Desktop\Notify\Notify\obj\x86\Debug\Notify.exe
+C:\Users\eos\Desktop\Notify\Notify\obj\x86\Debug\Notify.pdb

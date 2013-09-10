@@ -232,10 +232,10 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
         
         spin = (Spinner)findViewById(R.id.spinner1);
         
-        /*wifi = new ConnectionDetector(getApplicationContext());
+        wifi = new ConnectionDetector(getApplicationContext());
         if(!wifi.isConnectingToInternet())
         	read_Table();
-        else*/
+        else
         	get_Table();
         
         add = (ImageButton)findViewById(R.id.imageButton1);
@@ -437,8 +437,8 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 		        dialog.setTitle("About");
 		        dialog.setMessage("Auther: Chun-Yen Lin\n" +
 		        				  "Website: hoyuisun/TravelMap\n" +
-		        				  "Version: v2.7\n" + 
-		        				  "Update: 09/04/2013");
+		        				  "Version: v2.8\n" + 
+		        				  "Update: 09/10/2013");
 		        dialog.setPositiveButton("½T©w",
 		                new DialogInterface.OnClickListener(){
 		                    public void onClick(
