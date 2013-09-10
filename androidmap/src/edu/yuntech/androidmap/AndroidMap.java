@@ -118,7 +118,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
     private ImageButton information;
     private boolean starting = false;
     
-    private String index = null;
+    private String index = "景點";
     private String regId;
     private int table_cnt = 0;
     private int select = 0;
@@ -128,8 +128,10 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
     public static ArrayList<String> viewStrings= new ArrayList<String>();
     public static ArrayList<LatLng> _planPoints = new ArrayList<LatLng>();
     private List<Data> _data = new ArrayList<Data>();
+    private List<Data> _infodata = new ArrayList<Data>();
     private List<String> _table = new ArrayList<String>();
     private HashMap<String, String> hash = new HashMap<String, String>();
+    private HashMap<String, String> infohash = new HashMap<String, String>();
     
     private ArrayAdapter<String> listAdapter;
 	LatLng center = new LatLng(24.730870310199286, 121.76321268081665);
@@ -290,6 +292,9 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 			        }else if(index.equals("醫院")){
 			        	getHospital(input);
 			        	
+			        }else if(index.equals("公廁")){
+			        	getRest(input);
+					
 			        }else{
 			        	getExtra(input);
 			        }
@@ -620,6 +625,9 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
         }else if(index.equals("醫院")){
         	getHospital(select);
         	
+        }else if(index.equals("公廁")){
+        	getRest(select);
+        	
         }else{
         	getExtra(select);
         }
@@ -692,11 +700,44 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 	            .snippet(info.context)
 	            .icon(dw)
 	            .title(info.site_tw));
-                _data.add(info);
-                hash.put(info.name_tw, info.id);
+                _infodata.add(info);
+                infohash.put(info.name_tw, info.id);
             }
         } catch(Exception e) {
             // Log.e("log_tag", e.toString());
+        }
+    }
+    
+    public void getRest(String select){
+    	try {
+            String result = DBConnector.executeQuery(select, "http://140.125.45.113/contest/travel.php");
+            /*
+                SQL 結果有多筆資料時使用JSONArray
+                                                                  只有一筆資料時直接建立JSONObject物件
+                JSONObject jsonData = new JSONObject(result);
+            */
+            JSONArray jsonArray = new JSONArray(result);
+            for(int i = 0; i < jsonArray.length(); i++) {
+                Data rest = new Data();
+            	JSONObject jsonData = jsonArray.getJSONObject(i);
+            	rest.id = jsonData.getString("id");
+            	rest.name_tw = jsonData.getString("公廁名稱");
+            	rest.context = jsonData.getString("單位名稱");
+            	rest.site_tw = jsonData.getString("地點");
+            	rest.phone = jsonData.getString("聯絡電話");
+            	rest.lat = jsonData.getString("lat");
+            	rest.lng = jsonData.getString("lng");
+                map.addMarker(new MarkerOptions()
+	            .position(new LatLng(Double.valueOf(rest.lat), Double.valueOf(rest.lng)))
+	            .snippet("地點: " + rest.site_tw + "\n單位名稱: " + rest.context + "\n電話: " + rest.phone)
+	            .icon(BitmapDescriptorFactory.fromResource(R.drawable.blue_marker))
+	            .title(rest.name_tw));
+                _data.add(rest);
+                hash.put(rest.name_tw, rest.id);
+            }
+        } catch(Exception e) {
+            // Log.e("log_tag", e.toString());
+        	Toast.makeText(AndroidMap.this, "尚未有地圖資訊", Toast.LENGTH_SHORT).show();
         }
     }
     
@@ -969,6 +1010,46 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 		}catch(Exception e){}
     }
     
+    public void offline_Restroom(String path){
+    	File vSDCard = null;
+    	FileReader vRead = null;
+    	String result = null;
+    	try{
+    		// 取得 SD Card 位置
+            vSDCard = Environment.getExternalStorageDirectory();
+            // 判斷目錄是否存在
+            File vPath = new File( vSDCard.getParent() + "/" + vSDCard.getName() + "/TravelMap");
+            if(!vPath.exists())
+            	vPath.mkdirs();
+            vRead = new FileReader( vSDCard.getParent() + "/" + vSDCard.getName() + path );
+    	} catch(Exception e){}
+    	try{
+			char[] buf = new char[1000000];
+			int num = vRead.read(buf);
+		    result = new String(buf, 0, num);
+    		vRead.close(); 
+    		JSONArray jsonArray = new JSONArray(result);
+    		for(int i = 0; i < jsonArray.length(); i++) {
+    			Data rest = new Data();
+            	JSONObject jsonData = jsonArray.getJSONObject(i);
+            	rest.id = jsonData.getString("id");
+            	rest.name_tw = jsonData.getString("公廁名稱");
+            	rest.context = jsonData.getString("單位名稱");
+            	rest.site_tw = jsonData.getString("地點");
+            	rest.phone = jsonData.getString("聯絡電話");
+            	rest.lat = jsonData.getString("lat");
+            	rest.lng = jsonData.getString("lng");
+                map.addMarker(new MarkerOptions()
+	            .position(new LatLng(Double.valueOf(rest.lat), Double.valueOf(rest.lng)))
+	            .snippet("地點: " + rest.site_tw + "\n單位名稱: " + rest.context + "\n電話: " + rest.phone)
+	            .icon(BitmapDescriptorFactory.fromResource(R.drawable.blue_marker))
+	            .title(rest.name_tw));
+                _data.add(rest);
+                hash.put(rest.name_tw, rest.id);
+            }
+		}catch(Exception e){}
+    }
+    
     public void offline_Extra(String path){
     	File vSDCard = null;
     	FileReader vRead = null;
@@ -1027,6 +1108,10 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
         else if(position.equals("醫院")){
             path += "醫院.json";
             offline_Hospital(path);
+        }
+        else if(position.equals("公廁")){
+        	path += "公廁.json";
+        	offline_Restroom(path);
         }
         else{
             path += position + ".json";
@@ -1290,7 +1375,16 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
     		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
     		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
     		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
-        	
+        }else if(index.equals("公廁")){
+        	intent.setClass(AndroidMap.this, Modify_restroom.class);
+        	Toast.makeText(getApplicationContext(), data_id, 5).show();
+    		bundle.putString("id", data_id);
+    		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
+    		bundle.putString("context", _data.get(Integer.valueOf(data_id)-1).context);
+    		bundle.putString("phone", _data.get(Integer.valueOf(data_id)-1).phone);
+    		bundle.putString("site_tw", _data.get(Integer.valueOf(data_id)-1).site_tw);
+    		bundle.putString("lat", _data.get(Integer.valueOf(data_id)-1).lat);
+    		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
         }else{
         	intent.setClass(AndroidMap.this, Modify_extra.class);
         	bundle.putString("select", index);
@@ -1444,6 +1538,9 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
             	
             }else if(index.equals("醫院")){
             	badge = R.drawable.hospital;
+            	
+            }else if(index.equals("公廁")){
+            	badge = R.drawable.restroom;
             	
             }else{
             	
@@ -1853,6 +1950,9 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
                 	
                 }else if(index.equals("醫院")){
                 	intent.setClass(AndroidMap.this, Add_hospital.class);
+                	
+                }else if(index.equals("公廁")){
+                	intent.setClass(AndroidMap.this, Add_restroom.class);
                 	
                 }else{
                 	intent.setClass(AndroidMap.this, Add_extra.class);
