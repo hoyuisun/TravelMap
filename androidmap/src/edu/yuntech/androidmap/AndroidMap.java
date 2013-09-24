@@ -274,7 +274,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 				// TODO Auto-generated method stub
 				LatLng now = new LatLng(mLocationClient.getLastLocation().getLatitude(), mLocationClient.getLastLocation().getLongitude());
 				//select * from log where (121.690425 < longitude and longitude < 121.700425);
-				String input = "select * from " + index + " where (" + Double.toString(center.longitude-0.02) + " < lng and lng < " + Double.toString(center.longitude+0.02) + " and lat > " + Double.toString(center.latitude-0.02) + " and lat < " + Double.toString(center.latitude+0.02) + ");";
+				String input = "select * from " + index + " where (" + Double.toString(now.longitude-0.02) + " < lng and lng < " + Double.toString(now.longitude+0.02) + " and lat > " + Double.toString(now.latitude-0.02) + " and lat < " + Double.toString(now.latitude+0.02) + ");";
 				clear_Data();
 				try{
 					//String result = DBConnector.executeQuery(input, "http://140.125.45.113/contest/post_mysql/query_table.php");
@@ -440,10 +440,10 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 				// TODO Auto-generated method stub
 				AlertDialog.Builder dialog = new AlertDialog.Builder(AndroidMap.this);
 		        dialog.setTitle("About");
-		        dialog.setMessage("Auther: Chun-Yen Lin\n" +
+		        dialog.setMessage("Team: Yuntech EOSLab\n" +
 		        				  "Website: hoyuisun/TravelMap\n" +
 		        				  "Version: v2.8\n" + 
-		        				  "Update: 09/10/2013");
+		        				  "Update: 09/24/2013");
 		        dialog.setPositiveButton("½T©w",
 		                new DialogInterface.OnClickListener(){
 		                    public void onClick(
@@ -1377,7 +1377,6 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
     		bundle.putString("lng", _data.get(Integer.valueOf(data_id)-1).lng);
         }else if(index.equals("¤½´Z")){
         	intent.setClass(AndroidMap.this, Modify_restroom.class);
-        	Toast.makeText(getApplicationContext(), data_id, 5).show();
     		bundle.putString("id", data_id);
     		bundle.putString("name_tw", _data.get(Integer.valueOf(data_id)-1).name_tw);
     		bundle.putString("context", _data.get(Integer.valueOf(data_id)-1).context);
