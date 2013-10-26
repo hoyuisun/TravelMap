@@ -376,32 +376,36 @@ containing a value of this type.
         public static final int homestay=0x7f02003d;
         public static final int hospital=0x7f02003e;
         public static final int ic_launcher=0x7f02003f;
-        public static final int icon=0x7f020040;
-        public static final int info=0x7f020041;
-        public static final int landscape=0x7f020042;
-        public static final int location_icon=0x7f020043;
-        public static final int message=0x7f020044;
-        public static final int nearby=0x7f020045;
-        public static final int offline=0x7f020046;
-        public static final int picture=0x7f020047;
-        public static final int plan=0x7f020048;
-        public static final int push=0x7f020049;
-        public static final int red_marker=0x7f02004a;
-        public static final int restaurant=0x7f02004b;
-        public static final int restroom=0x7f02004c;
-        public static final int roadwork=0x7f02004d;
-        public static final int roadwork_marker=0x7f02004e;
-        public static final int roadwork_marker_icon=0x7f02004f;
-        public static final int star=0x7f020050;
-        public static final int startup=0x7f020051;
-        public static final int submit=0x7f020052;
-        public static final int submit_down=0x7f020053;
-        public static final int success=0x7f020054;
-        public static final int traffic_jam=0x7f020055;
-        public static final int traffic_jam_marker=0x7f020056;
-        public static final int traffic_jam_markericon=0x7f020057;
-        public static final int train=0x7f020058;
-        public static final int weather=0x7f020059;
+        public static final int ic_plusone_medium_off_client=0x7f020040;
+        public static final int ic_plusone_small_off_client=0x7f020041;
+        public static final int ic_plusone_standard_off_client=0x7f020042;
+        public static final int ic_plusone_tall_off_client=0x7f020043;
+        public static final int icon=0x7f020044;
+        public static final int info=0x7f020045;
+        public static final int landscape=0x7f020046;
+        public static final int location_icon=0x7f020047;
+        public static final int message=0x7f020048;
+        public static final int nearby=0x7f020049;
+        public static final int offline=0x7f02004a;
+        public static final int picture=0x7f02004b;
+        public static final int plan=0x7f02004c;
+        public static final int push=0x7f02004d;
+        public static final int red_marker=0x7f02004e;
+        public static final int restaurant=0x7f02004f;
+        public static final int restroom=0x7f020050;
+        public static final int roadwork=0x7f020051;
+        public static final int roadwork_marker=0x7f020052;
+        public static final int roadwork_marker_icon=0x7f020053;
+        public static final int star=0x7f020054;
+        public static final int startup=0x7f020055;
+        public static final int submit=0x7f020056;
+        public static final int submit_down=0x7f020057;
+        public static final int success=0x7f020058;
+        public static final int traffic_jam=0x7f020059;
+        public static final int traffic_jam_marker=0x7f02005a;
+        public static final int traffic_jam_markericon=0x7f02005b;
+        public static final int train=0x7f02005c;
+        public static final int weather=0x7f02005d;
     }
     public static final class id {
         public static final int action_settings=0x7f040059;
@@ -534,32 +538,32 @@ containing a value of this type.
         public static final int main=0x7f090000;
     }
     public static final class string {
-        public static final int action_settings=0x7f05002f;
-        public static final int app_id=0x7f050041;
-        public static final int app_name=0x7f05002e;
+        public static final int action_settings=0x7f050033;
+        public static final int app_id=0x7f050045;
+        public static final int app_name=0x7f050032;
         /**   Title for notification shown when GooglePlayServices needs to be
         enabled for a application to work. [CHAR LIMIT=70] 
          */
-        public static final int auth_client_needs_enabling_title=0x7f050029;
+        public static final int auth_client_needs_enabling_title=0x7f05002d;
         /**   Title for notification shown when GooglePlayServices needs to be
         installed for a application to work. [CHAR LIMIT=70] 
          */
-        public static final int auth_client_needs_installation_title=0x7f05002a;
+        public static final int auth_client_needs_installation_title=0x7f05002e;
         /**   Title for notification shown when GooglePlayServices needs to be
         udpated for a application to work. [CHAR LIMIT=70] 
          */
-        public static final int auth_client_needs_update_title=0x7f05002b;
+        public static final int auth_client_needs_update_title=0x7f05002f;
         /**   Title for notification shown when GooglePlayServices is unavailable [CHAR LIMIT=42] 
          */
-        public static final int auth_client_play_services_err_notification_msg=0x7f05002c;
+        public static final int auth_client_play_services_err_notification_msg=0x7f050030;
         /**   Requested by string saying which app requested the notification. [CHAR LIMIT=42] 
          */
-        public static final int auth_client_requested_by_msg=0x7f05002d;
+        public static final int auth_client_requested_by_msg=0x7f050031;
         /**   Title for notification shown when a bad version of GooglePlayServices
         has been installed and needs correction for an application to work.
         [CHAR LIMIT=70] 
          */
-        public static final int auth_client_using_bad_version_title=0x7f050028;
+        public static final int auth_client_using_bad_version_title=0x7f05002c;
         public static final int com_facebook_choose_friends=0x7f05000f;
         public static final int com_facebook_dialogloginactivity_ok_button=0x7f050000;
         public static final int com_facebook_internet_permission_error_message=0x7f050013;
@@ -613,19 +617,31 @@ containing a value of this type.
         Google Play services (from Play Store) [CHAR LIMIT=40] 
          */
         public static final int common_google_play_services_install_title=0x7f050019;
+        /**  Message in confirmation dialog informing the user that they provided an invalid account. [CHAR LIMIT=NONE] 
+         */
+        public static final int common_google_play_services_invalid_account_text=0x7f050025;
+        /**  Title of confirmation dialog informing the user that they provided an invalid account. [CHAR LIMIT=40] 
+         */
+        public static final int common_google_play_services_invalid_account_title=0x7f050024;
+        /**  Message in confirmation dialog informing the user that a network error occurred. [CHAR LIMIT=NONE] 
+         */
+        public static final int common_google_play_services_network_error_text=0x7f050023;
+        /**  Title of confirmation dialog informing the user that a network error occurred. [CHAR LIMIT=40] 
+         */
+        public static final int common_google_play_services_network_error_title=0x7f050022;
         /**  Message in confirmation dialog informing user there is an unknown issue in Google Play
         services [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_unknown_issue=0x7f050022;
+        public static final int common_google_play_services_unknown_issue=0x7f050026;
         /**  Message in confirmation dialog informing user that Google Play services is not supported on their device [CHAR LIMIT=NONE] 
          */
-        public static final int common_google_play_services_unsupported_text=0x7f050024;
+        public static final int common_google_play_services_unsupported_text=0x7f050028;
         /**  Title of confirmation dialog informing user that Google Play services is not supported on their device [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_unsupported_title=0x7f050023;
+        public static final int common_google_play_services_unsupported_title=0x7f050027;
         /**  Button in confirmation dialog for updating Google Play services [CHAR LIMIT=40] 
          */
-        public static final int common_google_play_services_update_button=0x7f050025;
+        public static final int common_google_play_services_update_button=0x7f050029;
         /**  Message in confirmation dialog informing user that they need to update
         Google Play services (from Play Store) [CHAR LIMIT=NONE] 
          */
@@ -636,27 +652,27 @@ containing a value of this type.
         public static final int common_google_play_services_update_title=0x7f050020;
         /**  Sign-in button text [CHAR LIMIT=15] 
          */
-        public static final int common_signin_button_text=0x7f050026;
+        public static final int common_signin_button_text=0x7f05002a;
         /**  Long form sign-in button text [CHAR LIMIT=30] 
          */
-        public static final int common_signin_button_text_long=0x7f050027;
-        public static final int error_config=0x7f050032;
-        public static final int gcm_deleted=0x7f050038;
-        public static final int gcm_error=0x7f050036;
-        public static final int gcm_message=0x7f050035;
-        public static final int gcm_recoverable_error=0x7f050037;
-        public static final int gcm_registered=0x7f050033;
-        public static final int gcm_unregistered=0x7f050034;
-        public static final int hello_world=0x7f050030;
-        public static final int options_clear=0x7f05003f;
-        public static final int options_exit=0x7f050040;
-        public static final int options_register=0x7f05003d;
-        public static final int options_unregister=0x7f05003e;
-        public static final int server_register_error=0x7f05003b;
-        public static final int server_registered=0x7f050039;
-        public static final int server_unregister_error=0x7f05003c;
-        public static final int server_unregistered=0x7f05003a;
-        public static final int title_activity_main=0x7f050031;
+        public static final int common_signin_button_text_long=0x7f05002b;
+        public static final int error_config=0x7f050036;
+        public static final int gcm_deleted=0x7f05003c;
+        public static final int gcm_error=0x7f05003a;
+        public static final int gcm_message=0x7f050039;
+        public static final int gcm_recoverable_error=0x7f05003b;
+        public static final int gcm_registered=0x7f050037;
+        public static final int gcm_unregistered=0x7f050038;
+        public static final int hello_world=0x7f050034;
+        public static final int options_clear=0x7f050043;
+        public static final int options_exit=0x7f050044;
+        public static final int options_register=0x7f050041;
+        public static final int options_unregister=0x7f050042;
+        public static final int server_register_error=0x7f05003f;
+        public static final int server_registered=0x7f05003d;
+        public static final int server_unregister_error=0x7f050040;
+        public static final int server_unregistered=0x7f05003e;
+        public static final int title_activity_main=0x7f050035;
     }
     public static final class style {
         /** 
