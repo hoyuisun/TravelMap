@@ -561,15 +561,20 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 			 * depending upon your app requirement
 			 * For now i am just displaying it on the screen
 			 * */
-			
 			// Showing received message
 			if(newMessage == null)
 				return;
 			else if(newMessage.equals("From Server: Successfully added device!"))
 				Toast.makeText(getApplicationContext(), newMessage, Toast.LENGTH_SHORT).show();
-			else
-				show_Dialog(newMessage, 2);
-			//Toast.makeText(getApplicationContext(), newMessage, Toast.LENGTH_LONG).show();
+			else{
+				int start = newMessage.indexOf("[警戒區域及事項]");
+				int end = newMessage.indexOf("[颱風動態]");
+				
+				if(start == -1 || end == -1)
+					show_Dialog(newMessage, 2);
+				else
+					show_Dialog(newMessage.substring(start+9, end), 2);
+			}
 			
 			// Releasing wake lock
 			WakeLocker.release();

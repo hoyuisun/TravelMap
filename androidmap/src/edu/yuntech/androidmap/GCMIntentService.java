@@ -50,7 +50,12 @@ public class GCMIntentService extends GCMBaseIntentService {
         	return ;
         displayMessage(context, message);
         // notifies user
-        generateNotification(context, message);
+        int start = message.indexOf("[警戒區域及事項]");
+		int end = message.indexOf("[颱風動態]");
+		if(start == -1 || end == -1)
+			generateNotification(context, message);
+		else
+			generateNotification(context, message.substring(start+9, end));
     }
 
     /**
@@ -62,7 +67,9 @@ public class GCMIntentService extends GCMBaseIntentService {
         String message = getString(R.string.gcm_deleted, total);
         displayMessage(context, message);
         // notifies user
-        generateNotification(context, message);
+        int start = message.indexOf("[警戒區域及事項]");
+		int end = message.indexOf("[颱風動態]");
+        generateNotification(context, message.substring(start, end));
     }
 
     /**
