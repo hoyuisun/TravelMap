@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">TextEditor</string>
+    <string name="create">Create (with UI)</string>
+    <string name="create_folder">Create Folder</string>
+    <string name="create_prog">Create (no UI)</string>
+    <string name="find">Find</string>
+    <string name="find_folder">Find folder</string>
+    <string name="title">Title</string>
+    <string name="save">Save</string>
+    <string name="back">Back</string>
+    <string name="edit">Edit</string>
+    <string name="sync">Sync</string>
+
+</resources>

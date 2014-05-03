@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5964754234578134604">"TextEditor"</string>
+    <string name="create" msgid="5137364999279065898">"बनाएं (UI के साथ)"</string>
+    <string name="create_folder" msgid="2653308773930413069">"फ़ोल्डर बनाएं"</string>
+    <string name="create_prog" msgid="2056176633182229234">"बनाएं (UI के बिना)"</string>
+    <string name="find" msgid="5823139539578114492">"ढूंढें"</string>
+    <string name="find_folder" msgid="2553542560670078276">"फ़ोल्डर ढूंढें"</string>
+    <string name="title" msgid="7556261558956442118">"शीर्षक"</string>
+    <string name="save" msgid="5266002363409052513">"सहेजें"</string>
+    <string name="back" msgid="3115195809046303436">"वापस जाएं"</string>
+    <string name="edit" msgid="2924009881999081378">"संपादित करें"</string>
+    <string name="sync" msgid="6302766981014655561">"समन्वयन करें"</string>
+</resources>

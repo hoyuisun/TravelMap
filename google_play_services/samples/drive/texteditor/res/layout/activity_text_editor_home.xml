@@ -1,0 +1,71 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="TextEditorHomeActivity" >
+
+    <Spinner android:id="@+id/accounts_spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"/>
+
+    <LinearLayout
+        android:id="@+id/create_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/accounts_spinner">
+      <Button
+          android:id="@+id/create"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/create" />
+
+      <Button
+          android:id="@+id/create_prog"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/create_prog" />
+
+      <Button
+            android:id="@+id/create_folder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/create_folder" />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/find_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/create_buttons">
+      <Button
+          android:id="@+id/find"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/find" />
+
+      <Button
+          android:id="@+id/find_folder"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/find_folder" />
+      <Button
+          android:id="@+id/sync"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/sync" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/recentListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/find_buttons"
+        android:layout_centerHorizontal="true" >
+    </ListView>
+</RelativeLayout>

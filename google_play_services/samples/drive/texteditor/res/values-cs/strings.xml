@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="app_name" msgid="5964754234578134604">"Textový editor"</string>
+    <string name="create" msgid="5137364999279065898">"Vytvořit (s uživatelský rozhraním)"</string>
+    <string name="create_folder" msgid="2653308773930413069">"Vytvořit složku"</string>
+    <string name="create_prog" msgid="2056176633182229234">"Vytvořit (bez uživatelského rozhraní)"</string>
+    <string name="find" msgid="5823139539578114492">"Najít"</string>
+    <string name="find_folder" msgid="2553542560670078276">"Najít složku"</string>
+    <string name="title" msgid="7556261558956442118">"Název"</string>
+    <string name="save" msgid="5266002363409052513">"Uložit"</string>
+    <string name="back" msgid="3115195809046303436">"Zpět"</string>
+    <string name="edit" msgid="2924009881999081378">"Upravit"</string>
+    <string name="sync" msgid="6302766981014655561">"Synchronizace"</string>
+</resources>
