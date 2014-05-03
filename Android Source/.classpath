@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
-	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.DEPENDENCIES"/>
-	<classpathentry exported="true" kind="lib" path="C:/TravelMap/Android Source/libs/gcm.jar"/>
-	<classpathentry exported="true" kind="lib" path="C:/TravelMap/Android Source/libs/android-support-v4.jar"/>
-	<classpathentry exported="true" kind="lib" path="C:/Program Files/adt-bundle-windows-x86_64-20130522/sdk/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar">
+	<classpathentry exported="true" kind="lib" path="C:/Users/eos/GitHub/0212/TravelMap-master/Android Source/libs/gcm.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/eos/GitHub/0212/TravelMap-master/Android Source/libs/android-support-v4.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/eos/GitHub/adt-bundle-windows-x86-20131030/sdk/extras/google/google_play_services/libproject/google-play-services_lib/libs/google-play-services.jar">
 		<attributes>
 			<attribute name="javadoc_location" value="file:/C:/Program%20Files/adt-bundle-windows-x86-20130522/sdk/extras/google/google_play_services/libproject/google-play-services_lib/libs/../../../docs/reference/"/>
 		</attributes>
@@ -14,5 +13,6 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/FacebookSDK"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/google-play-services_lib"/>
+	<classpathentry exported="true" kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

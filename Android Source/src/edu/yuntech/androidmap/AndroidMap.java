@@ -34,6 +34,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
@@ -123,6 +124,8 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
     private String regId;
     private int table_cnt = 0;
     private int select = 0;
+    private boolean first = true;
+    private int save = 0;
     private List<LatLng> _points = new ArrayList<LatLng>();
     public static ArrayList<LatLng> _view = new ArrayList<LatLng>();
     public static HashMap<String, ArrayList<LatLng>> viewhash = new HashMap<String, ArrayList<LatLng>>();
@@ -444,8 +447,8 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 		        dialog.setTitle("About");
 		        dialog.setMessage("Team: Yuntech EOSLab\n" +
 		        				  "Website: hoyuisun/TravelMap\n" +
-		        				  "Version: v1.1\n" + 
-		        				  "Update: 01/16/2013");
+		        				  "Version: v1.2\n" + 
+		        				  "Update: 02/12/2014");
 		        dialog.setPositiveButton("確定",
 		                new DialogInterface.OnClickListener(){
 		                    public void onClick(
@@ -458,6 +461,42 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
         });
         
     }
+	
+	// 將資料由 Preferences 取回
+	private void restorePrefs() {
+	    SharedPreferences settings = getSharedPreferences("PREF_DATA", 0);
+	    save = settings.getInt("Login", 0);
+	    if(save == 0) {
+	    	new AlertDialog.Builder(AndroidMap.this)
+			.setTitle("問卷填寫")
+			.setIcon(android.R.drawable.ic_dialog_info)
+			.setMessage("請協助填寫宜起遊蘭趣問卷\n利於我們收集使用者回饋")
+			.setPositiveButton("馬上前往", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+		            save = 1;
+		            String url="http://goo.gl/fGU6wA";
+		            Intent ie = new Intent(Intent.ACTION_VIEW,Uri.parse(url));
+		            ie.setClassName("com.android.browser", "com.android.browser.BrowserActivity");
+		            startActivity(ie);
+		        }
+			})
+			.setNegativeButton("暫時不要", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+		            save = 0;
+		        }
+			})
+			.show();
+	    }
+	}
+	 
+	// 將資料存入 Preferences
+	private void storePrefs() {
+	    SharedPreferences settings = getSharedPreferences("PREF_DATA", 0);
+	    settings.edit().putInt("Login", save).commit();
+	}
+	
 	public void offline_Download(String select, String name){
 		File vSDCard = null;
     	FileWriter vFile = null;
@@ -1593,6 +1632,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 		}catch (Exception e) {
 			Log.e("UnRegister Receiver Error", "> " + e.getMessage());
 		}
+		storePrefs();
 	}
 
 	@Override
@@ -1664,6 +1704,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 	    	mLocationClient.disconnect();
 	    }
 	    uiHelper.onPause();
+	    storePrefs();
     }
 	
 	@Override
@@ -1680,6 +1721,7 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
 			Log.e("UnRegister Receiver Error", "> " + e.getMessage());
 		}
 		uiHelper.onDestroy();
+		storePrefs();
 	}
 	
 	@Override
@@ -1709,6 +1751,10 @@ public class AndroidMap extends FragmentActivity implements OnMapClickListener, 
             .setPositiveButton("確定", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                	if(first == true){
+                		restorePrefs();
+                		first = false;
+                	}
                 }
             });
     	}else if(flag == 1){
